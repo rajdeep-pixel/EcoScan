@@ -19,3 +19,13 @@ class ReportModel(Base):
     image_data = Column(String, nullable=True) # Store Base64 string for speed
 
 Base.metadata.create_all(bind=engine)
+
+class ReportModel(Base):
+    __tablename__ = "reports"
+    id = Column(Integer, primary_key=True, index=True)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
+    severity = Column(String, nullable=False) # Use lowercase: "low", "medium", "high"
+    status = Column(String, default="reported") # Use lowercase: "reported", "in-progress", "cleaned"
+    desc = Column(String, nullable=True) # NEW: Added for Rajdeep's "report.desc"
+    image_data = Column(String, nullable=True)
