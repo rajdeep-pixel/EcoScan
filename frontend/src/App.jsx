@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import LandingPage from './components/LandingPage';
+import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import MapView from './components/MapView';
 import ReportModal from './components/ReportModal';
@@ -9,33 +11,27 @@ import './index.css';
 let nextId = SEED_REPORTS.length + 1;
 
 export default function App() {
-  const [reports, setReports]         = useState(SEED_REPORTS);
-  const [showModal, setShowModal]     = useState(false);
+  const [started, setStarted]                 = useState(false);
+  const [reports, setReports]                 = useState(SEED_REPORTS);
+  const [showModal, setShowModal]             = useState(false);
   const [pickingLocation, setPickingLocation] = useState(false);
   const [pinnedLocation, setPinnedLocation]   = useState(null);
 
-  // ── Volunteer claims a spot ──
   function handleClaimSpot(id) {
-    setReports(prev =>
-      prev.map(r => r.id === id ? { ...r, status: 'in-progress' } : r)
-    );
+    setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'in-progress' } : r));
   }
 
-  // ── Someone submits a new report ──
   function handleNewReport({ severity, lat, lng, photo, desc }) {
-    const newReport = {
-      id: nextId++,
-      lat, lng, severity,
+    setReports(prev => [...prev, {
+      id: nextId++, lat, lng, severity,
       status: 'reported',
       desc: desc || 'New waste spot reported',
       photo,
-    };
-    setReports(prev => [...prev, newReport]);
+    }]);
     setPickingLocation(false);
     setPinnedLocation(null);
   }
 
-  // ── Map click while picking location ──
   function handleMapClick(latlng) {
     if (!pickingLocation) return;
     setPinnedLocation({ lat: latlng.lat, lng: latlng.lng });
@@ -43,17 +39,18 @@ export default function App() {
     setShowModal(true);
   }
 
-  // ── User taps "Drop pin on map" inside modal ──
   function handleStartPinning() {
     setPinnedLocation(null);
     setPickingLocation(true);
     setShowModal(false);
   }
 
+  if (!started) return <LandingPage onGetStarted={() => setStarted(true)} />;
+
   return (
     <>
+      <Sidebar onLogout={() => setStarted(false)} />
       <Dashboard reports={reports} />
-
       <MapView
         reports={reports}
         onClaimSpot={handleClaimSpot}
@@ -63,14 +60,16 @@ export default function App() {
 
       {/* FAB */}
       <button
-        className="fab"
         onClick={() => { setShowModal(true); setPickingLocation(false); }}
+        className="fixed bottom-7 right-6 z-[1000] w-14 h-14 rounded-full bg-indigo-500
+                   text-white border-0 flex items-center justify-center cursor-pointer
+                   shadow-[0_8px_30px_rgba(99,102,241,0.5)] hover:scale-105
+                   hover:shadow-[0_12px_40px_rgba(99,102,241,0.7)] active:scale-95 transition-all"
         title="Report a waste spot"
       >
         <Plus size={28} />
       </button>
 
-      {/* Report Modal */}
       {showModal && (
         <ReportModal
           onClose={() => setShowModal(false)}
