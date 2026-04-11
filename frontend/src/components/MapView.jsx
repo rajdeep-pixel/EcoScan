@@ -102,21 +102,19 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                       <div className="grid grid-cols-2 gap-2.5">
                         <div className="flex flex-col gap-1.5">
                           <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black shadow-sm">
-                            <img 
-                              src={report.image_data || 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=200'} 
-                              alt="Before" 
-                              className="w-full h-full object-cover" 
-                            />
+                            {report.before_image
+                              ? <img src={report.before_image} alt="Before" className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center text-white/20 text-[0.65rem] font-bold uppercase tracking-widest">No photo</div>
+                            }
                           </div>
                           <span className="text-[0.62rem] text-slate-500 text-center font-black tracking-widest uppercase">{t.before}</span>
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <div className="relative aspect-square rounded-xl overflow-hidden border border-green-500/30 shadow-[0_4px_15px_rgba(34,197,94,0.2)] bg-black">
-                            <img 
-                              src={report.after_image_data || 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=200'} 
-                              alt="After" 
-                              className="w-full h-full object-cover" 
-                            />
+                            {report.after_image
+                              ? <img src={report.after_image} alt="After" className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center text-green-400/30 text-[0.65rem] font-bold uppercase tracking-widest">No photo</div>
+                            }
                           </div>
                           <span className="text-[0.62rem] text-green-500 text-center font-black tracking-widest uppercase">{t.after}</span>
                         </div>
@@ -124,11 +122,10 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                     </div>
                   ) : (
                     <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 mb-4 bg-black shadow-md">
-                      <img 
-                        src={report.image_data || 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=200'} 
-                        alt="Before" 
-                        className="w-full h-full object-cover" 
-                      />
+                      {report.before_image
+                        ? <img src={report.before_image} alt="Before" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-white/20 text-[0.65rem] font-bold uppercase tracking-widest">No photo uploaded</div>
+                      }
                     </div>
                   )}
 

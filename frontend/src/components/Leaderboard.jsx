@@ -93,12 +93,12 @@ export default function Leaderboard({ onClose, t, theme }) {
                     <div className="flex flex-col gap-1">
                       <span className="text-[1.05rem] font-black text-[var(--text-main)] group-hover:text-green-400 transition-colors uppercase tracking-tight">{v.name}</span>
                       <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
-                        {v.count} {t.cleaned}
+                        {v.cleanups} {t.cleaned}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[1.5rem] font-black text-green-400 tracking-tighter leading-none">{v.points}</span>
+                    <span className="text-[1.5rem] font-black text-green-400 tracking-tighter leading-none">{v.score}</span>
                     <span className="text-[0.6rem] text-slate-600 font-black uppercase tracking-[0.2em]">{t.points}</span>
                   </div>
                 </div>
