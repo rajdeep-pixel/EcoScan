@@ -39,6 +39,11 @@ class ReportModel(Base):
     
     # Requirement: User adds a photo [cite: 18]
     image_data = Column(String, nullable=True) # [cite: 18]
+    
+    # NEW fields for Verification & Leaderboard
+    reporter_name    = Column(String, nullable=True) # Who found the waste
+    volunteer_name   = Column(String, nullable=True)
+    after_image_data = Column(String, nullable=True) # The "After" photo proof
 
 # Create tables immediately on import
 Base.metadata.create_all(bind=engine)
