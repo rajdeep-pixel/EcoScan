@@ -1,97 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import logo from '../assets/logo.png';
-
-function FluidBackground() {
-  const canvasRef = useRef(null);
-  const mouse = useRef({ x: -1000, y: -1000 });
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    const handleMouseMove = (e) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
-    };
-
-    window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', handleMouseMove);
-    resize();
-
-    const baseBlobs = Array.from({ length: 6 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      radius: Math.random() * 500 + 300,
-      vx: (Math.random() - 0.5) * 0.8,
-      vy: (Math.random() - 0.5) * 0.8,
-      color: `hsla(140, 80%, 8%, 0.45)`,
-      magnetism: 0.008
-    }));
-
-    const accentBlobs = Array.from({ length: 12 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      radius: Math.random() * 200 + 100,
-      vx: (Math.random() - 0.5) * 2.5,
-      vy: (Math.random() - 0.5) * 2.5,
-      color: `hsla(150, 70%, 20%, 0.35)`,
-      magnetism: 0.025
-    }));
-
-    const allBlobs = [...baseBlobs, ...accentBlobs];
-
-    const render = () => {
-      ctx.fillStyle = '#010604';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      allBlobs.forEach(blob => {
-        blob.x += blob.vx;
-        blob.y += blob.vy;
-
-        const dx = mouse.current.x - blob.x;
-        const dy = mouse.current.y - blob.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 800) {
-          blob.x += dx * blob.magnetism;
-          blob.y += dy * blob.magnetism;
-        }
-
-        if (blob.x < -blob.radius) blob.x = canvas.width + blob.radius;
-        if (blob.x > canvas.width + blob.radius) blob.x = -blob.radius;
-        if (blob.y < -blob.radius) blob.y = canvas.height + blob.radius;
-        if (blob.y > canvas.height + blob.radius) blob.y = -blob.radius;
-
-        const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
-        gradient.addColorStop(0, blob.color);
-        gradient.addColorStop(1, 'transparent');
-        
-        ctx.beginPath();
-        ctx.fillStyle = gradient;
-        ctx.arc(blob.x, blob.y, blob.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.filter = 'blur(110px)';
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-80" />;
-}
+import CursorGlow from './CursorGlow';
 
 export default function LandingPage({ onAuthenticate, t, lang, setLang, loading }) {
   const [mode, setMode] = useState('register');
@@ -119,8 +28,8 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden font-['Outfit'] bg-black">
-      <FluidBackground />
+    <div className="fixed inset-0 flex flex-col items-start justify-center overflow-hidden font-['Outfit'] bg-black pl-10 md:pl-24 lg:pl-32 search-cursor">
+      <CursorGlow />
 
       {/* Language Switch - Top Right (Floating Style) */}
       <div className="fixed top-10 right-10 z-50 flex items-center gap-6">
@@ -140,117 +49,124 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
         </button>
       </div>
 
-      <div className="relative z-10 w-full max-w-[480px] px-6 flex flex-col items-center mb-[15px]">
-        
-        {/* Responsive Massive Branding (Anchored Title) */}
-        <div className="flex flex-col items-center mb-10">
-            <div className="relative mb-[-72px] md:mb-[-96px] z-0">
-                <div className="absolute inset-0 bg-emerald-600/20 blur-[140px] animate-pulse rounded-full" />
-                <img src={logo} alt="Logo" className="relative w-72 h-72 md:w-96 md:h-96 object-contain drop-shadow-[0_0_80px_rgba(5,150,105,0.7)]" />
-            </div>
-            <h1 className="relative z-10 text-7xl md:text-8xl font-black tracking-[calc(-0.06em)] m-0 leading-[0.8] bg-gradient-to-r from-white via-emerald-600 to-emerald-900 bg-clip-text text-transparent">
-                EcoScan
+      <div className="relative z-20 flex flex-col items-center max-w-[440px] w-full animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        {/* Animated Brand Header */}
+        <div className="mb-12 group">
+          <div className="relative mb-6 transform transition-transform duration-700 group-hover:scale-105">
+            <div className="absolute -inset-4 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700" />
+            <img src={logo} alt="EcoScan" className="relative w-48 h-auto drop-shadow-[0_0_25px_rgba(16,185,129,0.3)]" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-6xl font-black tracking-tighter mb-3 bg-gradient-to-b from-white via-white to-emerald-400 bg-clip-text text-transparent drop-shadow-sm leading-tight">
+              EcoScan
             </h1>
-            <p className="relative z-10 text-[#059669]/60 text-[0.65rem] md:text-[0.75rem] font-black uppercase tracking-[0.5em] mt-5">{t.tagline}</p>
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-[1px] w-8 bg-emerald-500/30" />
+              <p className="text-[0.7rem] font-bold tracking-[0.4em] text-emerald-500/80 uppercase">
+                {t.heroSub}
+              </p>
+              <div className="h-[1px] w-8 bg-emerald-500/30" />
+            </div>
+          </div>
         </div>
 
-        {/* Tailored Auth Panel (Centered Screen Fit) */}
-        <div className="w-full bg-black/60 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-6 shadow-[0_45px_120px_rgba(0,0,0,0.9)] flex flex-col gap-3.5 transition-all hover:border-emerald-500/10 active:scale-[0.99] duration-500 mb-[15px]">
+        {/* Dynamic Auth Card */}
+        <div className="w-full bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] p-3 border border-white/10 shadow-2xl relative overflow-hidden group/card transition-all duration-500 hover:border-emerald-500/20">
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
           
-          {/* Row 1: Mode Toggle */}
-          <div className="flex justify-center">
-               <div className="relative w-full h-[46px] bg-black/40 rounded-xl p-1 flex border border-white/5">
-                  <div 
-                    className="absolute top-1 bottom-1 bg-gradient-to-br from-[#059669] to-[#064e3b] rounded-lg transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_4px_15px_rgba(5,150,105,0.4)]"
-                    style={{ 
-                        left: mode === 'register' ? '4px' : 'calc(50% + 1px)', 
-                        width: 'calc(50% - 5px)' 
-                    }}
-                  />
-                  <button 
-                    onClick={() => setMode('register')}
-                    className={`relative z-10 flex-1 text-[0.6rem] font-black uppercase tracking-widest transition-colors duration-300 ${mode === 'register' ? 'text-white' : 'text-white/20 hover:text-white/35'}`}
+          {/* Mode Toggle */}
+          <div className="flex p-2 gap-2 mb-4 bg-black/40 rounded-3xl relative z-10">
+            {['register', 'login'].map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={`flex-1 py-3 px-6 rounded-2xl text-[0.7rem] font-black tracking-widest uppercase transition-all duration-500
+                  ${mode === m 
+                    ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                    : 'text-white/40 hover:text-white/60 hover:bg-white/5'}`}
+              >
+                {t[m]}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-3 p-2 relative z-10">
+            {mode === 'register' && (
+              <input
+                type="text"
+                placeholder={t.namePlaceholder}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+              />
+            )}
+            <input
+              type="email"
+              placeholder={t.emailPlaceholder}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+            />
+            <input
+              type="password"
+              placeholder={t.passwordPlaceholder}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+            />
+
+            {mode === 'register' && (
+              <div className="flex gap-2 bg-black/20 p-2 rounded-2xl border border-white/5">
+                {['citizen', 'volunteer'].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRole(r)}
+                    className={`flex-1 py-3 rounded-xl text-[0.65rem] font-bold tracking-widest uppercase transition-all
+                      ${role === r ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/30 hover:text-white/50'}`}
                   >
-                    {t.register}
+                    {t[r]}
                   </button>
-                  <button 
-                  onClick={() => setMode('login')}
-                  className={`relative z-10 flex-1 text-[0.6rem] font-black uppercase tracking-widest transition-colors duration-300 ${mode === 'login' ? 'text-white' : 'text-white/20 hover:text-white/35'}`}
-                  >
-                    {t.login}
-                  </button>
-                 </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-black rounded-[1.5rem] py-4 px-6 font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <>
+                  {mode === 'register' ? t.createAccount : t.startScanning}
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </>
+              )}
+            </button>
           </div>
+        </div>
 
-          {/* Row 2: Horizontal Name & Email pairing */}
-          <div className={`grid gap-3 transition-all duration-300 ${mode === 'register' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-                {mode === 'register' && (
-                    <input
-                        type="text"
-                        placeholder={t.enterName}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full h-[46px] bg-white/[0.03] border border-white/5 rounded-xl px-5 text-sm text-white focus:outline-none focus:border-emerald-500/30 transition-all font-medium"
-                    />
-                )}
-                <input
-                    type="email"
-                    placeholder={t.enterEmail}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-[46px] bg-white/[0.03] border border-white/5 rounded-xl px-5 text-sm text-white focus:outline-none focus:border-emerald-500/30 transition-all font-medium"
-                />
-          </div>
-
-          {/* Row 3: Password */}
-          <div className="w-full">
-                <input
-                    type="password"
-                    placeholder={t.enterPassword}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-                    className="w-full h-[46px] bg-white/[0.03] border border-white/5 rounded-xl px-5 text-sm text-white focus:outline-none focus:border-emerald-500/30 transition-all font-medium outline-none"
-                />
-          </div>
-
-          {/* Row 4: Role Section */}
-          {mode === 'register' && (
-                <div className="w-full flex justify-center">
-                    <div className="w-full flex gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
-                        {['citizen', 'volunteer'].map((r) => (
-                            <button
-                                key={r}
-                                onClick={() => setRole(r)}
-                                className={`flex-1 py-2.5 rounded-lg text-[0.6rem] font-black uppercase tracking-[0.2em] transition-all duration-300
-                                    ${role === r ? 'bg-emerald-600/20 text-emerald-500 border border-emerald-600/25' : 'bg-transparent text-white/10 hover:text-white/20 border border-transparent'}`}
-                            >
-                                {r === 'citizen' ? t.citizen : t.volunteer}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-          )}
-
-          {/* Row 5: Final Action Button */}
-          <div className="pt-2 border-t border-white/[0.05] flex justify-center">
-                <button
-                    onClick={handleStart}
-                    disabled={loading}
-                    className="w-full h-[50px] bg-gradient-to-r from-[#059669] to-[#047857] text-white rounded-[1.1rem] font-black uppercase tracking-[0.3em] text-[0.7rem] flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(5,150,105,0.3)] hover:shadow-[0_20px_70px_rgba(5,150,105,0.5)] active:scale-[0.98] transition-all duration-500 disabled:opacity-50"
-                >
-                    {loading ? <Loader /> : (mode === 'register' ? t.createAccount : t.signIn)}
-                    {!loading && <span className="text-xl mt-[-2.5px]">&rarr;</span>}
-                </button>
+        {/* Technical Footer */}
+        <div className="mt-12 flex flex-col items-center gap-4 opacity-40">
+          <div className="flex gap-8">
+            <div className="flex flex-col items-center">
+              <span className="text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-1">Status</span>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[0.6rem] font-medium uppercase tracking-widest">Orbital Online</span>
+              </div>
+            </div>
+            <div className="w-[1px] h-8 bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-1">Region</span>
+              <span className="text-[0.6rem] font-medium uppercase tracking-widest text-emerald-400">Global Scan</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function Loader() {
-  return (
-    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
   );
 }
