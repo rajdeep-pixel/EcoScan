@@ -1,7 +1,25 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const API = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
+
+API.interceptors.request.use((config) => {
+  const rawSession = localStorage.getItem('ecoscan_session');
+  if (rawSession) {
+    try {
+      const session = JSON.parse(rawSession);
+      if (session?.token) {
+        config.headers.Authorization = `Bearer ${session.token}`;
+      }
+    } catch (error) {
+      localStorage.removeItem('ecoscan_session');
+    }
+  }
+  return config;
 });
 
 // GET all reports for the map
@@ -11,31 +29,28 @@ export async function fetchReports() {
 }
 
 // POST a new report
-export async function createReport({ lat, lng, severity, desc, imageData, reporter_name }) {
+export async function createReport({ lat, lng, severity, desc, landmark, imageData }) {
   const { data } = await API.post('/reports', {
     lat,
     lng,
     severity,
     desc,
+    landmark,
     image_data: imageData || null,
-    reporter_name: reporter_name || 'Anonymous'
   });
   return data;
 }
 
 // PATCH claim a report for cleanup
-export async function claimReport(reportId, volunteerName) {
-  const { data } = await API.patch(`/reports/${reportId}/claim`, {
-    volunteer_name: volunteerName
-  });
+export async function claimReport(reportId) {
+  const { data } = await API.patch(`/reports/${reportId}/claim`);
   return data;
 }
 
 // PATCH submit cleanup proof (marks as cleaned)
-export async function submitCleanup(reportId, afterImageData, volunteerName) {
+export async function submitCleanup(reportId, afterImageData) {
   const { data } = await API.patch(`/reports/${reportId}/clean`, {
     after_image_data: afterImageData,
-    volunteer_name: volunteerName
   });
   return data;
 }

@@ -1,6 +1,13 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { DEFAULT_CENTER, DEFAULT_ZOOM, SEVERITY_COLOR } from '../data/seedReports';
+
+const DEFAULT_CENTER = [20.5937, 78.9629];
+const DEFAULT_ZOOM = 5;
+const SEVERITY_COLOR = {
+  low: '#00ff44',
+  medium: '#ffcc00',
+  high: '#ff0033',
+};
 
 function MapClickCapture({ onMapClick }) {
   useMapEvents({ click: (e) => onMapClick && onMapClick(e.latlng) });
@@ -21,7 +28,7 @@ const createSolidIcon = (color, size, isCleaning) => {
   });
 };
 
-export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocation, t, mapMode }) {
+export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocation, t, mapMode, currentUser }) {
   if (!t) return null; 
 
   const isSatellite = mapMode === 'satellite';
@@ -34,11 +41,13 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
 
   const filterClass = isSatellite ? 'dark-map-filter' : 'street-map-filter';
 
+  const mapCenter = reports?.length ? [reports[0].lat, reports[0].lng] : DEFAULT_CENTER;
+
   return (
     <div className={`relative w-full h-full transition-all duration-700 ${filterClass}`}>
 
       <MapContainer
-        center={DEFAULT_CENTER}
+        center={mapCenter}
         zoom={DEFAULT_ZOOM}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
@@ -129,13 +138,18 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                     </div>
                   )}
 
-                  {report.status === 'reported' && (
+                  {report.status === 'reported' && currentUser?.role === 'volunteer' && (
                     <button
                       onClick={() => onClaimSpot(report.id)}
                       className="w-full py-3 btn-green-gradient text-white font-black text-[0.8rem] rounded-xl cursor-pointer transition-all shadow-lg uppercase tracking-widest"
                     >
                       {t.claimForCleanup}
                     </button>
+                  )}
+                  {report.status === 'reported' && currentUser?.role !== 'volunteer' && (
+                    <div className="text-[0.72rem] text-slate-500 font-bold uppercase tracking-widest text-center">
+                      {t.volunteerOnlyAction}
+                    </div>
                   )}
                   {report.status === 'in-progress' && (
                     <div className="flex flex-col gap-2.5">
@@ -146,6 +160,16 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                       >
                         {t.submitProof}
                       </button>
+                    </div>
+                  )}
+                  {report.status === 'pending-review' && (
+                    <div className="mt-3 pt-3 border-t border-white/5 text-[0.72rem] text-blue-300">
+                      {report.verification_summary || t.pendingReview}
+                    </div>
+                  )}
+                  {report.status === 'verification-failed' && (
+                    <div className="mt-3 pt-3 border-t border-white/5 text-[0.72rem] text-red-300">
+                      {report.verification_summary || t.verificationFailed}
                     </div>
                   )}
                   {isCleaned && report.volunteer_name && (

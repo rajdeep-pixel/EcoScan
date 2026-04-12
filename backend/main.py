@@ -1,13 +1,27 @@
+import hashlib
+import hmac
+import secrets
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case, desc
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from contextlib import asynccontextmanager
 
-from database import SessionLocal, ReportModel, User, engine, Base
+from ai_review import review_cleanup_images
+from database import ReportModel, SessionLocal, User, ensure_schema
+
+ROLE_CITIZEN = "citizen"
+ROLE_VOLUNTEER = "volunteer"
+VALID_ROLES = {ROLE_CITIZEN, ROLE_VOLUNTEER}
+VALID_REPORT_STATUSES = {
+    "reported",
+    "in-progress",
+    "cleaned",
+    "pending-review",
+    "verification-failed",
+}
 
 
 # --- 1. REAL-TIME WEBSOCKET MANAGER ---
@@ -53,10 +67,10 @@ POINT_MAP = {"low": 10, "medium": 25, "high": 50}
 # --- 3. LIFESPAN (DB setup + seed) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    ensure_schema()
     db = SessionLocal()
     try:
-        if db.query(User).count() == 0:
+        if False and db.query(User).count() == 0:
             db.add_all([
                 User(name="Rajdeep", total_score=150, cleanup_count=4),
                 User(name="Tulsi", total_score=120, cleanup_count=3),
@@ -79,23 +93,29 @@ app.add_middleware(
 
 
 # --- 4. SCHEMAS ---
+class RegisterRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    email: str = Field(min_length=5, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+    role: str
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+
+
 class ReportCreate(BaseModel):
     lat: float
     lng: float
     severity: str
     desc: Optional[str] = None
     landmark: Optional[str] = None
-    image_data: Optional[str] = None
-    reporter_name: Optional[str] = "Anonymous"
-
-
-class ReportClaim(BaseModel):
-    volunteer_name: str
+    image_data: str = Field(min_length=10)
 
 
 class ReportClean(BaseModel):
-    after_image_data: str
-    volunteer_name: Optional[str] = None
+    after_image_data: str = Field(min_length=10)
 
 
 def get_db():
@@ -104,6 +124,90 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def normalize_role(role: str) -> str:
+    normalized = role.strip().lower()
+    if normalized not in VALID_ROLES:
+        raise HTTPException(status_code=400, detail="Role must be citizen or volunteer")
+    return normalized
+
+
+def normalize_severity(severity: str) -> str:
+    normalized = severity.strip().lower()
+    if normalized not in POINT_MAP:
+        raise HTTPException(status_code=400, detail="Severity must be low, medium, or high")
+    return normalized
+
+
+def hash_password(password: str, salt: Optional[str] = None) -> str:
+    safe_salt = salt or secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), safe_salt.encode("utf-8"), 100000)
+    return f"{safe_salt}${digest.hex()}"
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    if not stored_hash or "$" not in stored_hash:
+        return False
+    salt, expected = stored_hash.split("$", 1)
+    candidate = hash_password(password, salt).split("$", 1)[1]
+    return hmac.compare_digest(candidate, expected)
+
+
+def issue_auth_token(user: User) -> str:
+    user.auth_token = secrets.token_urlsafe(32)
+    return user.auth_token
+
+
+def serialize_user(user: User) -> dict:
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "score": user.total_score,
+        "cleanups": user.cleanup_count,
+    }
+
+
+def serialize_report(report: ReportModel) -> dict:
+    return {
+        "id": report.id,
+        "lat": report.lat,
+        "lng": report.lng,
+        "severity": report.severity,
+        "status": report.status,
+        "desc": report.desc,
+        "landmark": report.landmark,
+        "before_image": report.image_data,
+        "after_image": report.after_image_data,
+        "reporter_name": report.reporter.name if report.reporter else report.reporter_name,
+        "reporter_role": report.reporter.role if report.reporter else None,
+        "volunteer_name": report.cleaner.name if report.cleaner else report.volunteer_name,
+        "verification_status": report.verification_status,
+        "verification_confidence": report.verification_confidence,
+        "verification_summary": report.verification_summary,
+    }
+
+
+def get_current_user(
+    authorization: Optional[str] = Header(default=None),
+    db: Session = Depends(get_db),
+) -> User:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+
+    token = authorization.split(" ", 1)[1].strip()
+    user = db.query(User).filter(User.auth_token == token).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session")
+    return user
+
+
+def require_volunteer(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != ROLE_VOLUNTEER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Volunteer account required")
+    return current_user
 
 
 # --- 5. WEBSOCKET ---
@@ -119,120 +223,171 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # --- 6. ENDPOINTS ---
 
+@app.post("/auth/register")
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    existing_email = db.query(User).filter(User.email == payload.email.lower()).first()
+    if existing_email:
+        raise HTTPException(status_code=409, detail="Email is already registered")
+
+    user = User(
+        name=payload.name.strip(),
+        email=payload.email.lower(),
+        password_hash=hash_password(payload.password),
+        role=normalize_role(payload.role),
+    )
+    token = issue_auth_token(user)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"token": token, "user": serialize_user(user)}
+
+
+@app.post("/auth/login")
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email.lower()).first()
+    if not user or not verify_password(payload.password, user.password_hash or ""):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token = issue_auth_token(user)
+    db.commit()
+    db.refresh(user)
+    return {"token": token, "user": serialize_user(user)}
+
+
+@app.get("/auth/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return {"user": serialize_user(current_user)}
+
 @app.get("/reports")
-def get_reports(db: Session = Depends(get_db), lang: str = "english"):
-    reports = db.query(ReportModel).all()
-    lang_map = TRANSLATIONS.get(lang.lower())
-    result = []
-    for r in reports:
-        result.append({
-            "id": r.id,
-            "lat": r.lat,
-            "lng": r.lng,
-            "severity": r.severity,
-            "severity_label": lang_map.get(r.severity.lower(), r.severity) if lang_map else r.severity,
-            "status": r.status,
-            "status_label": lang_map.get(r.status.lower(), r.status) if lang_map else r.status,
-            "desc": r.desc,
-            "landmark": r.landmark,
-            "before_image": r.image_data,
-            "after_image": r.after_image_data,
-            "reporter_name": r.reporter_name,
-            "volunteer_name": r.volunteer_name,
-            "cleaner_name": r.cleaner.name if r.cleaner else r.volunteer_name,
-            "cleaner_score": r.cleaner.total_score if r.cleaner else None,
-        })
-    return result
+def get_reports(db: Session = Depends(get_db)):
+    reports = db.query(ReportModel).order_by(ReportModel.id.desc()).all()
+    return [serialize_report(report) for report in reports]
 
 
 @app.post("/reports")
-async def create_report(report: ReportCreate, db: Session = Depends(get_db)):
+async def create_report(
+    report: ReportCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     new_report = ReportModel(
         lat=report.lat,
         lng=report.lng,
-        severity=report.severity.lower(),
+        severity=normalize_severity(report.severity),
         status="reported",
-        desc=report.desc,
-        landmark=report.landmark,
+        desc=report.desc.strip() if report.desc else None,
+        landmark=report.landmark.strip() if report.landmark else None,
         image_data=report.image_data,
-        reporter_name=report.reporter_name,
+        reporter_name=current_user.name,
+        reporter_id=current_user.id,
+        verification_status="not-started",
     )
     db.add(new_report)
     db.commit()
     db.refresh(new_report)
-    await manager.broadcast("update_reports")
-    return new_report
+    return serialize_report(new_report)
 
 
 @app.patch("/reports/{report_id}/claim")
-async def claim_report(report_id: int, claim: ReportClaim, db: Session = Depends(get_db)):
+def claim_report(
+    report_id: int,
+    current_user: User = Depends(require_volunteer),
+    db: Session = Depends(get_db),
+):
     report = db.query(ReportModel).filter(ReportModel.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+    if report.status not in {"reported", "verification-failed"}:
+        raise HTTPException(status_code=400, detail="This report cannot be claimed right now")
+
     report.status = "in-progress"
-    report.volunteer_name = claim.volunteer_name
-
-    # Link to User record if it exists
-    user = db.query(User).filter(User.name == claim.volunteer_name).first()
-    if user:
-        report.claimed_by_id = user.id
-
+    report.volunteer_name = current_user.name
+    report.claimed_by_id = current_user.id
     db.commit()
-    await manager.broadcast("update_reports")
-    return report
+    db.refresh(report)
+    return serialize_report(report)
 
 
 @app.patch("/reports/{report_id}/clean")
-async def clean_report(report_id: int, clean: ReportClean, db: Session = Depends(get_db)):
+async def clean_report(
+    report_id: int,
+    clean: ReportClean,
+    current_user: User = Depends(require_volunteer),
+    db: Session = Depends(get_db),
+):
     report = db.query(ReportModel).filter(ReportModel.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+    if report.claimed_by_id and report.claimed_by_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the volunteer who claimed this report can submit proof")
+    if not report.image_data:
+        raise HTTPException(status_code=400, detail="This report is missing a before image")
 
     report.after_image_data = clean.after_image_data
-    report.status = "cleaned"
+    report.volunteer_name = current_user.name
+    report.claimed_by_id = current_user.id
 
-    if clean.volunteer_name:
-        report.volunteer_name = clean.volunteer_name
+    verification = review_cleanup_images(
+        before_image=report.image_data,
+        after_image=clean.after_image_data,
+        description=report.desc or "",
+        landmark=report.landmark or "",
+    )
 
-    # Award points to linked User OR find user by volunteer_name
-    points = POINT_MAP.get(report.severity.lower(), 10)
-    user = None
-    if report.claimed_by_id:
-        user = db.query(User).filter(User.id == report.claimed_by_id).first()
-    if not user and report.volunteer_name:
-        user = db.query(User).filter(User.name == report.volunteer_name).first()
-        if not user:
-            # Auto-create the user so they appear on the leaderboard
-            user = User(name=report.volunteer_name, total_score=0, cleanup_count=0)
-            db.add(user)
-            db.flush()
+    report.verification_status = verification["status"]
+    report.verification_confidence = verification["confidence"]
+    report.verification_summary = verification["summary"]
 
-    if user:
-        user.total_score += points
-        user.cleanup_count += 1
+    points = 0
+    if verification["status"] == "approved":
+        report.status = "cleaned"
+        points = POINT_MAP.get(report.severity.lower(), 10)
+        current_user.total_score += points
+        current_user.cleanup_count += 1
+    elif verification["status"] == "unavailable":
+        report.status = "pending-review"
+    else:
+        report.status = "verification-failed"
 
     db.commit()
-    await manager.broadcast("update_leaderboard")
-    await manager.broadcast("update_reports")
-    return {"status": "cleaned", "points_awarded": points}
+    db.refresh(report)
+    db.refresh(current_user)
+    return {
+        "report": serialize_report(report),
+        "points_awarded": points,
+        "verification": verification,
+    }
 
 
 @app.get("/leaderboard")
 def get_leaderboard(db: Session = Depends(get_db)):
-    """Returns all users ranked by total_score descending."""
-    users = db.query(User).order_by(User.total_score.desc()).all()
+    users = (
+        db.query(User)
+        .filter(User.role == ROLE_VOLUNTEER)
+        .order_by(User.total_score.desc(), User.cleanup_count.desc(), User.name.asc())
+        .all()
+    )
     return [
-        {"name": u.name, "cleanups": u.cleanup_count, "score": u.total_score}
+        {"name": u.name, "role": u.role, "cleanups": u.cleanup_count, "score": u.total_score}
         for u in users
     ]
 
 
 @app.get("/stats")
 def get_stats(db: Session = Depends(get_db)):
+    reports = db.query(ReportModel).all()
+    counts = {report_status: 0 for report_status in VALID_REPORT_STATUSES}
+    for report in reports:
+        if report.status in counts:
+            counts[report.status] += 1
+
     return {
-        "total": db.query(ReportModel).count(),
-        "in_progress": db.query(ReportModel).filter(ReportModel.status == "in-progress").count(),
-        "cleaned": db.query(ReportModel).filter(ReportModel.status == "cleaned").count(),
+        "total": len(reports),
+        "reported": counts["reported"],
+        "in_progress": counts["in-progress"],
+        "cleaned": counts["cleaned"],
+        "pending_review": counts["pending-review"],
+        "verification_failed": counts["verification-failed"],
     }
 
 

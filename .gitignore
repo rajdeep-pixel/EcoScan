@@ -7,7 +7,6 @@ venv/
 
 # Databases
 *.sqlite3
-*.db
 
 
 # Logs
@@ -33,4 +32,21 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw?   
+
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+backend/*.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/build/
+
+# OS files
+.DS_Store
+Thumbs.db

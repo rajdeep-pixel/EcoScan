@@ -24,27 +24,31 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
 
   function handleSubmit() {
     if (mode === 'REPORT' && !location) return;
-    if (mode === 'PROOF' && !photo) return;
+    if (!photo) return;
+
+    const payload = {
+      severity,
+      lat: location?.lat ?? null,
+      lng: location?.lng ?? null,
+      desc,
+      landmark,
+      mode,
+      reportId
+    };
     
     // Convert photo to base64 if it exists
     if (photo) {
       const reader = new FileReader();
       reader.onloadend = () => {
         onSubmit({ 
-          severity, 
-          lat: location?.lat, 
-          lng: location?.lng, 
+          ...payload,
           photo: reader.result, 
-          desc,
-          landmark,
-          mode,
-          reportId
         });
         onClose();
       };
       reader.readAsDataURL(photo);
     } else {
-      onSubmit({ severity, lat: location.lat, lng: location.lng, photo: null, desc, landmark, mode, reportId });
+      onSubmit({ ...payload, photo: null });
       onClose();
     }
   }
@@ -167,7 +171,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
         {/* Photo */}
         <div>
           <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">
-            {isProof ? `${t.after} ${(t.photoOptional ?? '(optional)').replace('(', '').replace(')', '')}` : (t.photoOptional ?? '(optional)')}
+          {isProof ? `${t.after} ${(t.photoOptional ?? '(optional)').replace('(', '').replace(')', '')}` : (t.photoOptional ?? '(optional)')}
           </div>
           <input
             type="file" accept="image/*" capture="environment"
@@ -180,7 +184,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          disabled={!isProof && locStatus !== 'ok'}
+          disabled={(!isProof && locStatus !== 'ok') || !photo}
           className="w-full py-4 btn-green-gradient disabled:opacity-30 disabled:cursor-not-allowed
                      text-white font-black text-base rounded-2xl border-0 cursor-pointer
                      transition-all hover:scale-[1.02] active:scale-95

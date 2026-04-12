@@ -6,12 +6,18 @@ const severityStyles = {
   high:   'bg-[#ff0033]/15 text-[#ff0033]',
 };
 
-export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, onOpenLeaderboard, userName = 'Rajdeep Shaw' }) {
-  const currentUser = userName;
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}&backgroundColor=000000`;
+export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, onOpenLeaderboard, currentUser }) {
+  const userName = currentUser?.name || '';
+  const initials = userName
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
-  const myReportsArray = reports.filter(r => r.reporter_name === currentUser);
-  const myCleanedArray = reports.filter(r => r.volunteer_name === currentUser && r.status === 'cleaned');
+  const myReportsArray = reports.filter(r => r.reporter_name === userName);
+  const myCleanedArray = reports.filter(r => r.volunteer_name === userName && r.status === 'cleaned');
   
   const myReports = myReportsArray.length;
   const myCleaned = myCleanedArray.length;
@@ -49,17 +55,17 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
           {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
 
-        {/* Profile with Dicebear Avatar (Black Background Sync) */}
+        {/* Profile */}
         <div className={`flex items-center gap-4 pb-6 transition-all duration-300 ${isOpen ? '' : 'sm:justify-center'} ${!isOpen && 'hidden sm:flex'}`}>
-          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-md bg-black">
-            <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-md bg-green-600 flex items-center justify-center text-white font-black">
+            {initials || 'U'}
           </div>
 
           {(isOpen) && (
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span className="font-black text-[1.1rem] text-white truncate tracking-tight">{currentUser}</span>
+              <span className="font-black text-[1.1rem] text-white truncate tracking-tight">{userName}</span>
               <span className="flex items-center gap-1.5 text-[0.7rem] text-slate-500 font-black uppercase tracking-[0.2em]">
-                VERIFIED ID
+                {currentUser?.role || t.citizen}
               </span>
             </div>
           )}

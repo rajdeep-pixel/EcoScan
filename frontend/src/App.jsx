@@ -7,12 +7,18 @@ import ReportModal from './components/ReportModal';
 import Leaderboard from './components/Leaderboard';
 import { translations } from './i18n/translations';
 import { Plus } from 'lucide-react';
+import { fetchCurrentUser, loginUser, registerUser } from './api/auth';
 import { fetchReports, createReport, claimReport, submitCleanup } from './api/reports';
-import { SEED_REPORTS } from './data/seedReports';
 import './index.css';
 
 export default function App() {
-  const [showLanding, setShowLanding] = useState(true);
+  const [session, setSession] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('ecoscan_session')) || null;
+    } catch {
+      return null;
+    }
+  });
   const [lang, setLang] = useState(localStorage.getItem('ecoScanLang') || 'en');
   const [reports, setReports] = useState([]);
   const [pickingLocation, setPickingLocation] = useState(false);
@@ -24,13 +30,10 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
   const [mapMode, setMapMode] = useState(localStorage.getItem('ecoScanMapMode') || 'street');
 
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('ecoscan_user') || '';
-  });
-
-  const t = translations[lang];
+  const t = { ...translations.en, ...(translations[lang] || {}) };
 
   useEffect(() => {
     localStorage.setItem('ecoScanLang', lang);
@@ -41,34 +44,83 @@ export default function App() {
   }, [mapMode]);
 
   useEffect(() => {
-    loadReports();
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (!session?.token) {
+      setReports([]);
+      return;
+    }
+    loadReports();
+  }, [session?.token]);
+
+  useEffect(() => {
+    if (!session?.token) return;
+
+    let ignore = false;
+    async function syncSession() {
+      try {
+        const { user } = await fetchCurrentUser(session.token);
+        if (!ignore) {
+          const nextSession = { ...session, user };
+          setSession(nextSession);
+          localStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+        }
+      } catch (error) {
+        if (!ignore) {
+          localStorage.removeItem('ecoscan_session');
+          setSession(null);
+        }
+      }
+    }
+
+    syncSession();
+    return () => {
+      ignore = true;
+    };
+  }, [session?.token]);
+
   async function loadReports() {
     setLoading(true);
     try {
       const data = await fetchReports();
-      setReports(data || SEED_REPORTS);
+      setReports(data || []);
     } catch (err) {
-      console.warn('API error, using seeds');
-      setReports(SEED_REPORTS);
+      console.warn('Failed to load reports:', err.message);
+      setReports([]);
     }
     setLoading(false);
   }
 
-  const handleGetStarted = (name) => {
-    const trimmedName = name.trim();
-    if (trimmedName) {
-      setUserName(trimmedName);
-      localStorage.setItem('ecoscan_user', trimmedName);
+  async function handleAuthenticate(credentials) {
+    setAuthLoading(true);
+    try {
+      const response = credentials.mode === 'register'
+        ? await registerUser(credentials)
+        : await loginUser(credentials);
+
+      const nextSession = {
+        token: response.token,
+        user: response.user,
+      };
+      localStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+      setSession(nextSession);
+    } catch (error) {
+      alert(error?.response?.data?.detail || t.authFailed);
+    } finally {
+      setAuthLoading(false);
     }
-    setShowLanding(false);
-  };
+  }
 
   async function handleClaimSpot(id, openProof = false) {
+    if (session?.user?.role !== 'volunteer') {
+      alert(t.volunteerOnlyAction);
+      return;
+    }
+
     if (openProof) {
       setActiveReportId(id);
       setModalMode('PROOF');
@@ -76,9 +128,9 @@ export default function App() {
       return;
     }
 
-    setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'in-progress', volunteer_name: userName } : r));
+    setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'in-progress', volunteer_name: session.user.name } : r));
     try { 
-      await claimReport(id, userName); 
+      await claimReport(id); 
       await loadReports();
     } catch (err) { 
       console.warn('Claim failed:', err.message); 
@@ -88,11 +140,10 @@ export default function App() {
   async function handleNewReport({ severity, lat, lng, photo, desc, landmark, mode, reportId }) {
     if (mode === 'PROOF') {
       try {
-        await submitCleanup(reportId, photo, userName);
+        await submitCleanup(reportId, photo);
         await loadReports(); 
       } catch (err) {
-        console.warn('Cleanup proof failed:', err.message);
-        setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: 'cleaned', after_image_data: photo, volunteer_name: userName } : r));
+        alert(err?.response?.data?.detail || t.cleanupFailed);
       }
       return;
     }
@@ -101,17 +152,11 @@ export default function App() {
       const newReport = await createReport({ 
         lat, lng, severity, desc, landmark,
         imageData: photo,
-        reporter_name: userName
       });
       setReports(prev => [...prev, newReport]);
       await loadReports();
     } catch (err) {
-      console.warn('Create failed, adding locally:', err.message);
-      setReports(prev => [...prev, {
-        id: Date.now(), lat, lng, severity,
-        status: 'reported', desc: desc || t.newWasteSpot, landmark, image_data: photo,
-        reporter_name: userName
-      }]);
+      alert(err?.response?.data?.detail || t.reportFailed);
     }
     setPickingLocation(false);
     setPinnedLocation(null);
@@ -136,8 +181,8 @@ export default function App() {
     setShowModal(true);
   }
 
-  if (showLanding) {
-    return <LandingPage onGetStarted={handleGetStarted} t={t} lang={lang} setLang={setLang} />;
+  if (!session?.token) {
+    return <LandingPage onAuthenticate={handleAuthenticate} t={t} lang={lang} setLang={setLang} loading={authLoading} />;
   }
 
   const sidebarWidth = isSidebarOpen ? 312 : 67;
@@ -148,14 +193,13 @@ export default function App() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(prev => !prev)}
         onLogout={() => {
-          localStorage.removeItem('ecoscan_user');
-          setUserName('');
-          setShowLanding(true);
+          localStorage.removeItem('ecoscan_session');
+          setSession(null);
         }}
         reports={reports}
         t={t}
         onOpenLeaderboard={() => setShowLeaderboard(true)}
-        userName={userName}
+        currentUser={session.user}
       />
       <Dashboard
         reports={reports}
@@ -166,7 +210,7 @@ export default function App() {
         onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
         mapMode={mapMode}
         setMapMode={setMapMode}
-        userName={userName}
+        userName={session.user?.name}
       />
 
       <div
@@ -180,6 +224,7 @@ export default function App() {
           pickingLocation={pickingLocation}
           t={t}
           mapMode={mapMode}
+          currentUser={session.user}
         />
       </div>
 
@@ -207,6 +252,7 @@ export default function App() {
           mode={modalMode}
           reportId={activeReportId}
           t={t}
+          currentUser={session.user}
         />
       )}
 
