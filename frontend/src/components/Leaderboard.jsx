@@ -20,7 +20,7 @@ export default function Leaderboard({ onClose, t, theme }) {
     getRanking();
   }, []);
 
-  const colors = ['bg-emerald-500', 'bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-rose-500'];
+  const colors = ['bg-emerald-700', 'bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-rose-500'];
 
   return (
     <div
@@ -46,7 +46,7 @@ export default function Leaderboard({ onClose, t, theme }) {
                 <p className="text-[0.72rem] text-slate-500 font-bold uppercase tracking-[0.15em] m-0">{t.topContributors}</p>
                 <span className="flex items-center gap-1 bg-red-500/15 border border-red-500/30 rounded-full px-2 py-0.5">
                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-[0.6rem] font-black text-red-400 uppercase tracking-widest">LIVE</span>
+                  <span className="text-[0.6rem] font-black text-red-400 uppercase tracking-widest">{t.live}</span>
                 </span>
               </div>
             </div>
@@ -62,7 +62,7 @@ export default function Leaderboard({ onClose, t, theme }) {
         {/* List */}
         <div className="flex flex-col gap-4 min-h-[350px] max-h-[450px] overflow-y-auto pr-2 no-scrollbar">
           {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-green-400 gap-4 opacity-60">
+            <div className="flex-1 flex flex-col items-center justify-center text-emerald-600 gap-4 opacity-60">
               <Loader2 size={42} className="animate-spin" />
               <span className="text-sm font-black uppercase tracking-widest">{t.calculatingRankings}</span>
             </div>
@@ -91,14 +91,14 @@ export default function Leaderboard({ onClose, t, theme }) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-[1.05rem] font-black text-[var(--text-main)] group-hover:text-green-400 transition-colors uppercase tracking-tight">{v.name}</span>
+                      <span className="text-[1.05rem] font-black text-[var(--text-main)] group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{v.name}</span>
                       <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
                         {v.cleanups} {t.cleaned}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[1.5rem] font-black text-green-400 tracking-tighter leading-none">{v.score}</span>
+                    <span className="text-[1.5rem] font-black text-emerald-600 tracking-tighter leading-none">{v.score}</span>
                     <span className="text-[0.6rem] text-slate-600 font-black uppercase tracking-[0.2em]">{t.points}</span>
                   </div>
                 </div>

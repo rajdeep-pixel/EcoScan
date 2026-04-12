@@ -11,13 +11,11 @@ const API = axios.create({
   },
 });
 
-// 2. Optimized API Functions
 export async function registerUser(payload) {
   try {
     const { data } = await API.post('/auth/register', payload);
     return data;
   } catch (error) {
-    // Extracts the error message from FastAPI's detail field
     throw error.response?.data?.detail || "Registration failed. Please try again.";
   }
 }
@@ -40,7 +38,6 @@ export async function fetchCurrentUser(token) {
     });
     return data;
   } catch (error) {
-    // If the token is expired or invalid, we throw an error to trigger a logout
     throw error.response?.status === 401 ? "Session expired" : "Failed to fetch user";
   }
 }

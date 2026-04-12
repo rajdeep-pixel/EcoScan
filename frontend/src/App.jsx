@@ -14,7 +14,7 @@ import './index.css';
 export default function App() {
   const [session, setSession] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('ecoscan_session')) || null;
+      return JSON.parse(sessionStorage.getItem('ecoscan_session')) || null;
     } catch {
       return null;
     }
@@ -55,6 +55,33 @@ export default function App() {
       return;
     }
     loadReports();
+
+    // --- REAL-TIME WEBSOCKET HANDLER ---
+    const socketUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/updates';
+    const socket = new WebSocket(socketUrl);
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_REPORT') {
+          setReports(prev => {
+            // Avoid duplicates
+            if (prev.some(r => r.id === data.report.id)) return prev;
+            return [data.report, ...prev];
+          });
+        } else if (data.type === 'REPORT_UPDATED') {
+          setReports(prev => prev.map(r => r.id === data.report.id ? data.report : r));
+        }
+      } catch (err) {
+        console.error('WebSocket message error:', err);
+      }
+    };
+
+    socket.onclose = () => console.log('WebSocket disconnected');
+
+    return () => {
+      socket.close();
+    };
   }, [session?.token]);
 
   useEffect(() => {
@@ -67,11 +94,11 @@ export default function App() {
         if (!ignore) {
           const nextSession = { ...session, user };
           setSession(nextSession);
-          localStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+          sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
         }
       } catch (error) {
         if (!ignore) {
-          localStorage.removeItem('ecoscan_session');
+          sessionStorage.removeItem('ecoscan_session');
           setSession(null);
         }
       }
@@ -89,6 +116,10 @@ export default function App() {
       const data = await fetchReports();
       setReports(data || []);
     } catch (err) {
+      if (err?.response?.status === 401) {
+        sessionStorage.removeItem('ecoscan_session');
+        setSession(null);
+      }
       console.warn('Failed to load reports:', err.message);
       setReports([]);
     }
@@ -106,7 +137,7 @@ export default function App() {
         token: response.token,
         user: response.user,
       };
-      localStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+      sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
       setSession(nextSession);
     } catch (error) {
       alert(error?.response?.data?.detail || t.authFailed);
@@ -133,6 +164,10 @@ export default function App() {
       await claimReport(id); 
       await loadReports();
     } catch (err) { 
+      if (err?.response?.status === 401) {
+        sessionStorage.removeItem('ecoscan_session');
+        setSession(null);
+      }
       console.warn('Claim failed:', err.message); 
     }
   }
@@ -143,7 +178,13 @@ export default function App() {
         await submitCleanup(reportId, photo);
         await loadReports(); 
       } catch (err) {
-        alert(err?.response?.data?.detail || t.cleanupFailed);
+        if (err?.response?.status === 401) {
+          sessionStorage.removeItem('ecoscan_session');
+          setSession(null);
+        }
+        if (err?.response?.status !== 401) {
+          alert(err?.response?.data?.detail || t.cleanupFailed);
+        }
       }
       return;
     }
@@ -156,7 +197,13 @@ export default function App() {
       setReports(prev => [...prev, newReport]);
       await loadReports();
     } catch (err) {
-      alert(err?.response?.data?.detail || t.reportFailed);
+      if (err?.response?.status === 401) {
+        sessionStorage.removeItem('ecoscan_session');
+        setSession(null);
+      }
+      if (err?.response?.status !== 401) {
+        alert(err?.response?.data?.detail || t.reportFailed);
+      }
     }
     setPickingLocation(false);
     setPinnedLocation(null);
@@ -193,7 +240,7 @@ export default function App() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(prev => !prev)}
         onLogout={() => {
-          localStorage.removeItem('ecoscan_session');
+          sessionStorage.removeItem('ecoscan_session');
           setSession(null);
         }}
         reports={reports}
@@ -229,7 +276,7 @@ export default function App() {
       </div>
 
       {loading && (
-        <div className="fixed top-20 right-6 z-[1100] bg-green-600/90 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg">
+        <div className="fixed top-20 right-6 z-[1100] bg-emerald-800/90 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg">
           {t.loadingReports}
         </div>
       )}
@@ -238,7 +285,7 @@ export default function App() {
         onClick={handleOpenReportModal}
         className="fixed bottom-7 right-6 z-[1000] w-14 h-14 rounded-full btn-green-gradient
                    text-white border-0 flex items-center justify-center cursor-pointer
-                   shadow-[0_8px_30px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 transition-all"
+                   shadow-[0_8px_30px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-all"
       >
         <Plus size={28} />
       </button>

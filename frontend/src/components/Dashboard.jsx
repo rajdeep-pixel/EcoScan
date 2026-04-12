@@ -13,7 +13,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
       {/* 1. Left Section: Branding */}
       <div className="flex items-center gap-4 group flex-shrink-0">
         <img src={logo} alt="EcoScan Logo" className="w-11 h-11 object-contain transition-transform group-hover:scale-110" />
-        <h1 className="text-2xl font-black tracking-tighter m-0 leading-none bg-gradient-to-br from-white to-green-500 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-black tracking-tighter m-0 leading-none bg-gradient-to-br from-white to-emerald-700 bg-clip-text text-transparent">
           {t.appTitle}
         </h1>
       </div>
@@ -34,7 +34,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
               onClick={() => setMapMode('street')}
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-0
                 ${mapMode === 'street' ? 'btn-green-gradient text-white shadow-lg' : 'text-white/30 hover:text-white/60'}`}
-              title="Street View"
+              title={t.streetView}
             >
               <Map size={18} />
             </button>
@@ -42,7 +42,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
               onClick={() => setMapMode('satellite')}
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-0
                 ${mapMode === 'satellite' ? 'btn-green-gradient text-white shadow-lg' : 'text-white/30 hover:text-white/60'}`}
-              title="Satellite View"
+              title={t.satelliteView}
             >
               <Globe size={18} />
             </button>
@@ -51,16 +51,16 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
           {/* Language Toggle - Background-free floating look */}
           <div className="flex gap-4">
             {[
-              { id: 'en', label: 'ENG' },
-              { id: 'hi', label: 'हिन्दी' }
+              { id: 'en', label: t.langEn },
+              { id: 'hi', label: t.langHi }
             ].map((l) => (
               <button
                 key={l.id}
                 onClick={() => setLang(l.id)}
                 className={`px-3 py-1.5 rounded-lg text-[0.7rem] font-black transition-all cursor-pointer border-0 tracking-widest uppercase
-                  ${lang === l.id ? 'text-green-500 scale-110' : 'text-white/50 hover:text-white/80'}`}
+                  ${lang === l.id ? 'text-emerald-600 scale-110' : 'text-white/50 hover:text-white/80'}`}
               >
-                {l.label}
+                {l.id === 'en' ? 'ENG' : 'हिन्दी'}
               </button>
             ))}
           </div>

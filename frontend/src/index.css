@@ -8,26 +8,31 @@
   --text-main: #f8fafc;
   --text-muted: #cbd5e1;
   --nav-bg: #000000;
+  --accent-emerald: #10b981;
+  --accent-midnight: #064e3b;
+  --accent-mint: #34d399;
 }
 
 body {
   margin: 0;
+  font-family: 'Outfit', sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
 }
 
-/* Midnight Edition 2D Green Gradient Button */
+/* Midnight Edition Emerald Gradient Button */
 .btn-green-gradient {
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+  background: linear-gradient(135deg, #10b981 0%, #064e3b 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .btn-green-gradient:hover {
-  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%) !important;
+  background: linear-gradient(135deg, #34d399 0%, #064e3b 100%) !important;
   transform: translateY(-0.5px);
-  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
 }
 
 .btn-green-gradient:active {
@@ -56,7 +61,7 @@ body {
 .solid-marker-inner {
   border-radius: 50%;
   border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(0, 0, 0, 0.3);
   width: 100%;
   height: 100%;
 }
@@ -70,12 +75,16 @@ body {
   border: 1px solid var(--border-card) !important;
   border-radius: 16px !important;
   color: #fff !important;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.8) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8) !important;
 }
-.leaflet-popup-tip { background: #000000 !important; }
-.leaflet-container { 
-  height: 100%; 
-  width: 100%; 
+
+.leaflet-popup-tip {
+  background: #000000 !important;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
   background: #000 !important;
 }
 
@@ -84,14 +93,36 @@ body {
 }
 
 @keyframes pulse-ring {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .4; transform: scale(1.3); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: .4;
+    transform: scale(1.3);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

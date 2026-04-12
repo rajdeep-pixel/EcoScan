@@ -54,7 +54,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
   }
 
   const severityConfig = {
-    low:    { label: t.low,    active: 'border-green-400/50 text-green-300 bg-green-400/10' },
+    low:    { label: t.low,    active: 'border-emerald-600/50 text-emerald-400 bg-emerald-600/10' },
     medium: { label: t.medium, active: 'border-orange-400/50 text-orange-300 bg-orange-400/10' },
     high:   { label: t.high,   active: 'border-red-400/50 text-red-300 bg-red-400/10' },
   };
@@ -110,7 +110,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.locationRequired}</div>
               <div className={`flex items-center gap-2.5 bg-white/[0.05] rounded-xl px-3.5 py-2.5 border
-                ${locStatus === 'ok'  ? 'border-green-400/40 text-green-300' :
+                ${locStatus === 'ok'  ? 'border-emerald-600/40 text-emerald-400' :
                   locStatus === 'err' ? 'border-red-400/40 text-red-300'     :
                   'border-white/[0.08] text-white/40'}`}
               >

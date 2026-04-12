@@ -1,7 +1,7 @@
 import { LogOut, MapPin, User, Clock, ChevronRight, ChevronLeft, Trophy } from 'lucide-react';
 
 const severityStyles = {
-  low:    'bg-[#00ff44]/15 text-[#00ff44]',
+  low:    'bg-emerald-600/15 text-emerald-600',
   medium: 'bg-[#ffcc00]/15 text-[#ffcc00]',
   high:   'bg-[#ff0033]/15 text-[#ff0033]',
 };
@@ -19,8 +19,8 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
   const myReportsArray = reports.filter(r => r.reporter_name === userName);
   const myCleanedArray = reports.filter(r => r.volunteer_name === userName && r.status === 'cleaned');
   
-  const myReports = myReportsArray.length;
-  const myCleaned = myCleanedArray.length;
+  const myReports = currentUser?.reports ?? myReportsArray.length;
+  const myCleaned = currentUser?.cleanups ?? myCleanedArray.length;
 
   const lastUserReport = [...myReportsArray].sort((a, b) => b.id - a.id)[0] || null;
 
@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
         {/* Desktop Toggle button - repositioned and centered vertically */}
         <button
           onClick={onToggle}
-          className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-[50%] z-20 w-8 h-8 rounded-full bg-green-600
+          className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-[50%] z-20 w-8 h-8 rounded-full bg-emerald-700
                      text-white shadow-xl items-center justify-center border-0
                      cursor-pointer transition-all hover:scale-110 active:scale-95
                      ${!isOpen && 'right-[33px] translate-x-0'}`}
@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
 
         {/* Profile */}
         <div className={`flex items-center gap-4 pb-6 transition-all duration-300 ${isOpen ? '' : 'sm:justify-center'} ${!isOpen && 'hidden sm:flex'}`}>
-          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-md bg-green-600 flex items-center justify-center text-white font-black">
+          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-md bg-emerald-700 flex items-center justify-center text-white font-black">
             {initials || 'U'}
           </div>
 
@@ -94,7 +94,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                       {lastUserReport.desc}
                     </p>
                     <span className="text-[0.68rem] text-slate-600 font-bold flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> {t.justNow}
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" /> {t.justNow}
                     </span>
                   </div>
                 ) : (
@@ -125,11 +125,11 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/[0.02] border border-white/[0.06] rounded-[2rem] p-5 flex flex-col gap-1.5 shadow-sm transition-all hover:bg-white/[0.04] hover:-translate-y-1">
-                    <span className="text-[2.2rem] font-black text-green-600 leading-none tracking-tighter">{myReports}</span>
+                    <span className="text-[2.2rem] font-black text-emerald-600 leading-none tracking-tighter">{myReports}</span>
                     <span className="text-[0.68rem] text-slate-500 font-black uppercase tracking-widest">{t.reported}</span>
                   </div>
                   <div className="bg-white/[0.02] border border-white/[0.06] rounded-[2rem] p-5 flex flex-col gap-1.5 shadow-sm transition-all hover:bg-white/[0.04] hover:-translate-y-1">
-                    <span className="text-[2.2rem] font-black text-green-600 leading-none tracking-tighter">{myCleaned}</span>
+                    <span className="text-[2.2rem] font-black text-emerald-600 leading-none tracking-tighter">{myCleaned}</span>
                     <span className="text-[0.68rem] text-slate-500 font-black uppercase tracking-widest">{t.cleaned}</span>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -8,7 +8,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-  const rawSession = localStorage.getItem('ecoscan_session');
+  const rawSession = sessionStorage.getItem('ecoscan_session');
   if (rawSession) {
     try {
       const session = JSON.parse(rawSession);
@@ -16,7 +16,7 @@ API.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
     } catch (error) {
-      localStorage.removeItem('ecoscan_session');
+      sessionStorage.removeItem('ecoscan_session');
     }
   }
   return config;
