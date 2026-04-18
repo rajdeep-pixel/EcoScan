@@ -35,7 +35,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
       )}
 
       <aside
-        className={`fixed top-[92px] left-0 bottom-0 z-[900] flex flex-col
+        className={`fixed top-[104px] lg:top-[112px] left-0 bottom-0 z-[900] flex flex-col
                     bg-black border-r border-white/[0.08]
                     transition-all duration-300 ease-in-out
                     ${isOpen 
@@ -47,8 +47,8 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
         {/* Desktop Toggle button - repositioned and centered vertically */}
         <button
           onClick={onToggle}
-          className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-[50%] z-20 w-8 h-8 rounded-full bg-emerald-700
-                     text-white shadow-xl items-center justify-center border-0
+          className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-[50%] z-20 w-8 h-8 rounded-full bg-emerald-500
+                     text-black shadow-xl items-center justify-center border-0
                      cursor-pointer transition-all hover:scale-110 active:scale-95
                      ${!isOpen && 'right-[33px] translate-x-0'}`}
         >
@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
 
         {/* Profile */}
         <div className={`flex items-center gap-4 pb-6 transition-all duration-300 ${isOpen ? '' : 'sm:justify-center'} ${!isOpen && 'hidden sm:flex'}`}>
-          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-md bg-emerald-700 flex items-center justify-center text-white font-black">
+          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-[0_5px_15px_rgba(16,185,129,0.3)] bg-emerald-500 flex items-center justify-center text-black font-black">
             {initials || 'U'}
           </div>
 
@@ -105,14 +105,14 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
               {/* Leaderboard Button */}
               <button
                 onClick={onOpenLeaderboard}
-                className="mb-8 flex items-center gap-4 btn-green-gradient rounded-[1.5rem] p-5 shadow-2xl transition-all group cursor-pointer border-0"
+                className="mb-8 flex items-center gap-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] p-5 transition-all group cursor-pointer border-0 shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 active:translate-y-0"
               >
                 <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white group-hover:rotate-12 transition-transform shadow-inner">
                   <Trophy size={20} />
                 </div>
                 <div className="flex flex-col items-start translate-y-0.5">
                   <span className="text-[0.95rem] font-black text-white leading-none uppercase tracking-tighter">{t.leaderboard}</span>
-                  <span className="text-[0.6rem] text-white/50 font-black uppercase tracking-[0.2em] mt-1">{t.rankingsAndAwards}</span>
+                  <span className="text-[0.6rem] text-white/60 font-black uppercase tracking-[0.2em] mt-1">{t.rankingsAndAwards}</span>
                 </div>
               </button>
 

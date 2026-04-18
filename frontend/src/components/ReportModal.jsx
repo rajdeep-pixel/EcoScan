@@ -109,10 +109,10 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
             {/* Location */}
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.locationRequired}</div>
-              <div className={`flex items-center gap-2.5 bg-white/[0.05] rounded-xl px-3.5 py-2.5 border
-                ${locStatus === 'ok'  ? 'border-emerald-600/40 text-emerald-400' :
+              <div className={`flex items-center gap-2.5 bg-black/30 rounded-[1.5rem] px-5 py-3.5 border
+                ${locStatus === 'ok'  ? 'border-emerald-500/40 text-emerald-400' :
                   locStatus === 'err' ? 'border-red-400/40 text-red-300'     :
-                  'border-white/[0.08] text-white/40'}`}
+                  'border-white/5 text-white/40'}`}
               >
                 <MapPin size={15} />
                 <span className="flex-1 text-[0.82rem]">
@@ -124,7 +124,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
                 {locStatus === 'loading'
                   ? <Loader size={15} className="animate-spin" />
                   : <button onClick={handleGeolocate} disabled={locStatus === 'loading'}
-                      className="bg-white/[0.12] text-white/80 border border-white/[0.1] rounded-lg px-3 py-1.5 text-[0.78rem] font-bold cursor-pointer whitespace-nowrap hover:bg-white/[0.18] transition-colors disabled:opacity-50">
+                      className="bg-white/5 text-white/80 border border-white/5 rounded-xl px-4 py-2 text-[0.78rem] font-bold cursor-pointer whitespace-nowrap hover:bg-white/10 transition-colors disabled:opacity-50">
                       {t.useGps}
                     </button>
                 }
@@ -132,7 +132,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
 
               <button
                 onClick={() => { onStartPinning(); onClose(); }}
-                className="mt-2 w-full bg-transparent border border-dashed border-white/[0.15] text-white/40 rounded-xl py-2 text-[0.82rem] font-semibold cursor-pointer hover:bg-white/[0.05] hover:text-white/60 transition-all"
+                className="mt-2 w-full bg-transparent border border-dashed border-white/[0.15] text-white/40 rounded-[1.5rem] py-3 text-[0.82rem] font-semibold cursor-pointer hover:bg-white/5 hover:text-white/60 transition-all"
               >
                 {t.dropPin}
               </button>
@@ -146,9 +146,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
                 onChange={e => setDesc(e.target.value)}
                 placeholder={t.placeholderDesc}
                 rows={2}
-                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3.5 py-2.5
-                           text-white/80 placeholder:text-white/20 text-[0.88rem] resize-none font-[inherit]
-                           focus:outline-none focus:border-white/[0.2]"
+                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40 resize-none font-[inherit]"
               />
             </div>
 
@@ -160,9 +158,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
                 value={landmark}
                 onChange={e => setLandmark(e.target.value)}
                 placeholder={t.landmarkPlaceholder}
-                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3.5 py-2.5
-                           text-white/80 placeholder:text-white/20 text-[0.88rem] font-[inherit]
-                           focus:outline-none focus:border-white/[0.2]"
+                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40 font-[inherit]"
               />
             </div>
           </>
@@ -176,8 +172,8 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
           <input
             type="file" accept="image/*" capture="environment"
             onChange={e => setPhoto(e.target.files[0])}
-            className="w-full bg-white/[0.05] border border-dashed border-white/[0.1] rounded-xl px-3.5 py-3 text-white/40 text-[0.85rem] cursor-pointer
-                       file:bg-white/[0.12] file:text-white/80 file:border file:border-white/[0.1] file:rounded-lg file:px-3 file:py-1.5 file:text-[0.8rem] file:font-bold file:mr-3 file:cursor-pointer"
+            className="w-full bg-black/30 border border-dashed border-white/10 rounded-[1.5rem] px-5 py-4 text-white/40 text-sm cursor-pointer
+                       file:bg-white/5 file:text-white file:border file:border-white/10 file:rounded-xl file:px-4 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-wider file:mr-4 file:cursor-pointer hover:file:bg-white/10 transition-all"
           />
         </div>
 
@@ -185,10 +181,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
         <button
           onClick={handleSubmit}
           disabled={(!isProof && locStatus !== 'ok') || !photo}
-          className="w-full py-4 btn-green-gradient disabled:opacity-30 disabled:cursor-not-allowed
-                     text-white font-black text-base rounded-2xl border-0 cursor-pointer
-                     transition-all hover:scale-[1.02] active:scale-95
-                     shadow-xl uppercase tracking-widest"
+          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 px-6 rounded-[1.5rem] font-black tracking-widest uppercase text-sm cursor-pointer transition-all shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-3 mt-2"
         >
           {isProof 
             ? t.submitProof 

@@ -151,7 +151,7 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                   {report.status === 'reported' && currentUser?.role === 'volunteer' && (
                     <button
                       onClick={() => onClaimSpot(report.id)}
-                      className="w-full py-3 btn-green-gradient text-white font-black text-[0.8rem] rounded-xl cursor-pointer transition-all shadow-lg uppercase tracking-widest"
+                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[0.8rem] rounded-xl cursor-pointer transition-all shadow-[0_5px_15px_rgba(16,185,129,0.2)] hover:shadow-[0_10px_20px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 uppercase tracking-widest"
                     >
                       {t.claimForCleanup}
                     </button>

@@ -20,7 +20,7 @@ export default function Leaderboard({ onClose, t, theme }) {
     getRanking();
   }, []);
 
-  const colors = ['bg-emerald-700', 'bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-rose-500'];
+  const colors = ['bg-emerald-600', 'bg-white/10 text-white', 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30', 'bg-black border border-white/20 text-white', 'bg-[#064e3b] text-white'];
 
   return (
     <div
@@ -37,7 +37,7 @@ export default function Leaderboard({ onClose, t, theme }) {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl btn-green-gradient flex items-center justify-center text-white shadow-lg rotate-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-[0_5px_15px_rgba(16,185,129,0.3)] rotate-3">
               <Trophy size={24} />
             </div>
             <div>
@@ -79,27 +79,27 @@ export default function Leaderboard({ onClose, t, theme }) {
                 <div key={v.name} className="flex items-center justify-between bg-white/[0.04] border border-white/[0.08] rounded-3xl p-5 transition-all hover:bg-white/[0.08] hover:translate-x-1 group">
                   <div className="flex items-center gap-5">
                     <div className="relative">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-sm shadow-md ${profileColor} border border-white/10`}>
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-sm shadow-[0_5px_15px_rgba(0,0,0,0.5)] ${profileColor}`}>
                         {initials}
                       </div>
-                      <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[var(--bg-main)] shadow-sm
-                        ${i === 0 ? 'bg-yellow-500' : 
-                          i === 1 ? 'bg-slate-400' :
-                          i === 2 ? 'bg-orange-500' :
-                          'bg-white/10'}`}>
-                        {rankIcon || <span className="text-[10px] font-black text-white">{i + 1}</span>}
+                      <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center border-2 border-black shadow-sm
+                        ${i === 0 ? 'bg-[#ffcc00] text-black' : 
+                          i === 1 ? 'bg-slate-300 text-black' :
+                          i === 2 ? 'bg-amber-600 text-white' :
+                          'bg-white/10 text-white'}`}>
+                        {rankIcon || <span className="text-[10px] font-black">{i + 1}</span>}
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-[1.05rem] font-black text-[var(--text-main)] group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{v.name}</span>
-                      <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
+                      <span className="text-[1.05rem] font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{v.name}</span>
+                      <span className="text-[0.7rem] text-white/50 font-bold uppercase tracking-wider">
                         {v.cleanups} {t.cleaned}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[1.5rem] font-black text-emerald-600 tracking-tighter leading-none">{v.score}</span>
-                    <span className="text-[0.6rem] text-slate-600 font-black uppercase tracking-[0.2em]">{t.points}</span>
+                    <span className="text-[1.5rem] font-black text-emerald-400 tracking-tighter leading-none">{v.score}</span>
+                    <span className="text-[0.6rem] text-white/30 font-black uppercase tracking-[0.2em]">{t.points}</span>
                   </div>
                 </div>
               );

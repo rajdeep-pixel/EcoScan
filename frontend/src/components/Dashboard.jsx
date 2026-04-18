@@ -12,7 +12,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
       
       {/* 1. Left Section: Branding */}
       <div className="flex items-center gap-4 group flex-shrink-0">
-        <img src={ecoscanTitle} alt="EcoScan Logo" className="h-6 w-auto object-contain transition-transform group-hover:scale-105" />
+        <img src={ecoscanTitle} alt="EcoScan Logo" className="h-16 lg:h-[4.5rem] w-auto object-contain transition-transform group-hover:scale-[1.03] origin-left" />
       </div>
 
       {/* 2. Middle Section: Centered Controls (Floating Look) */}
@@ -29,16 +29,16 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
           <div className="flex gap-2 mr-4">
             <button
               onClick={() => setMapMode('street')}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-0
-                ${mapMode === 'street' ? 'btn-green-gradient text-white shadow-lg' : 'text-white/30 hover:text-white/60'}`}
+              className={`w-10 h-10 rounded-[1rem] flex items-center justify-center transition-all cursor-pointer border-0
+                ${mapMode === 'street' ? 'bg-emerald-500 text-white shadow-[0_5px_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5' : 'bg-transparent text-white/30 hover:text-white/60 hover:bg-white/5'}`}
               title={t.streetView}
             >
               <Map size={18} />
             </button>
             <button
               onClick={() => setMapMode('satellite')}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-0
-                ${mapMode === 'satellite' ? 'btn-green-gradient text-white shadow-lg' : 'text-white/30 hover:text-white/60'}`}
+              className={`w-10 h-10 rounded-[1rem] flex items-center justify-center transition-all cursor-pointer border-0
+                ${mapMode === 'satellite' ? 'bg-emerald-500 text-white shadow-[0_5px_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5' : 'bg-transparent text-white/30 hover:text-white/60 hover:bg-white/5'}`}
               title={t.satelliteView}
             >
               <Globe size={18} />

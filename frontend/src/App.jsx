@@ -283,9 +283,9 @@ export default function App() {
 
       <button
         onClick={handleOpenReportModal}
-        className="fixed bottom-7 right-6 z-[1000] w-14 h-14 rounded-full btn-green-gradient
+        className="fixed bottom-7 right-6 z-[1000] w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600
                    text-white border-0 flex items-center justify-center cursor-pointer
-                   shadow-[0_8px_30px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-all"
+                   shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.4)] hover:-translate-y-1 active:translate-y-0 transition-all"
       >
         <Plus size={28} />
       </button>

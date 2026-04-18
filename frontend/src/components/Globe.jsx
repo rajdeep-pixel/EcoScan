@@ -8,8 +8,6 @@ function latLngToXYZ(lat, lng, r) {
   const theta = (lng + 180) * (Math.PI / 180);
   return [-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta)];
 }
-
-// Location pin marker
 function LocationPin({ position }) {
   const pos = useMemo(() => new THREE.Vector3(...position), [position]);
   const quaternion = useMemo(() => {
