@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@theme {
+  --color-emerald-300: #1acc88;
+  --color-emerald-400: #00b36b; 
+  --color-emerald-500: #008851; 
+  --color-emerald-600: #00663d; 
+  --color-emerald-700: #004d2e;
+}
+
 :root {
   --bg-main: #000000;
   --bg-card: rgba(255, 255, 255, 0.05);
@@ -8,9 +16,9 @@
   --text-main: #f8fafc;
   --text-muted: #cbd5e1;
   --nav-bg: #000000;
-  --accent-emerald: #10b981;
-  --accent-midnight: #064e3b;
-  --accent-mint: #34d399;
+  --accent-emerald: #008851;
+  --accent-midnight: #004d2e;
+  --accent-mint: #00b36b;
 }
 
 body {
@@ -23,15 +31,15 @@ body {
 }
 
 .btn-green-gradient {
-  background: linear-gradient(135deg, #10b981 0%, #064e3b 100%) !important;
+  background: linear-gradient(135deg, #008851 0%, #004d2e 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 136, 81, 0.2);
 }
 
 .btn-green-gradient:hover {
-  background: linear-gradient(135deg, #34d399 0%, #064e3b 100%) !important;
+  background: linear-gradient(135deg, #00b36b 0%, #004d2e 100%) !important;
   transform: translateY(-0.5px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 136, 81, 0.3);
 }
 
 .btn-green-gradient:active {

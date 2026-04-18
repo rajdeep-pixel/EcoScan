@@ -7,17 +7,14 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
   const cleaned    = reports.filter(r => r.status === 'cleaned').length;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center px-6 py-5
+    <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center px-6 py-3
                        bg-black border-b border-white/[0.08] transition-all duration-300 shadow-2xl">
       
-      {/* 1. Left Section: Branding */}
       <div className="flex items-center gap-4 group flex-shrink-0">
-        <img src={ecoscanTitle} alt="EcoScan Logo" className="h-16 lg:h-[4.5rem] w-auto object-contain transition-transform group-hover:scale-[1.03] origin-left" />
+        <img src={ecoscanTitle} alt="EcoScan Logo" className="h-14 lg:h-[4rem] w-auto object-contain transition-transform group-hover:scale-[1.03] origin-left" />
       </div>
 
-      {/* 2. Middle Section: Centered Controls (Floating Look) */}
       <div className="flex-1 flex justify-center items-center gap-8 pl-12">
-          {/* Mobile Menu */}
           <button
             onClick={onToggleSidebar}
             className="sm:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/70 hover:text-white cursor-pointer transition-colors"
@@ -25,7 +22,6 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
             <Menu size={22} />
           </button>
 
-          {/* Map Mode Toggle - Street vs Satellite */}
           <div className="flex gap-2 mr-4">
             <button
               onClick={() => setMapMode('street')}
@@ -45,7 +41,6 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
             </button>
           </div>
 
-          {/* Language Toggle - Background-free floating look */}
           <div className="flex gap-4">
             {[
               { id: 'en', label: t.langEn },

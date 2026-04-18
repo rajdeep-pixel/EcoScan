@@ -34,7 +34,6 @@ export default function Leaderboard({ onClose, t, theme }) {
                       p-8 flex flex-col gap-7
                       animate-[slideUp_0.4s_cubic-bezier(0.2,0.8,0.2,1)]">
 
-        {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-[0_5px_15px_rgba(16,185,129,0.3)] rotate-3">
@@ -59,7 +58,6 @@ export default function Leaderboard({ onClose, t, theme }) {
           </button>
         </div>
 
-        {/* List */}
         <div className="flex flex-col gap-4 min-h-[350px] max-h-[450px] overflow-y-auto pr-2 no-scrollbar">
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center text-emerald-600 gap-4 opacity-60">
@@ -112,7 +110,6 @@ export default function Leaderboard({ onClose, t, theme }) {
           )}
         </div>
 
-        {/* Footer info */}
         <div className="pt-4 border-t border-white/[0.06] text-center">
           <p className="text-[0.68rem] text-slate-500 font-bold uppercase tracking-wider italic">
             {t.scoringInfo}

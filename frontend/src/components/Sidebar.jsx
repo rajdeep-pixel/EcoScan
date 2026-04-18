@@ -26,7 +26,6 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
 
   return (
     <>
-      {/* Mobile Backdrop */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-[850] bg-black/60 backdrop-blur-md sm:hidden transition-opacity duration-300"
@@ -35,7 +34,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
       )}
 
       <aside
-        className={`fixed top-[104px] lg:top-[112px] left-0 bottom-0 z-[900] flex flex-col
+        className={`fixed top-[80px] lg:top-[88px] left-0 bottom-0 z-[900] flex flex-col
                     bg-black border-r border-white/[0.08]
                     transition-all duration-300 ease-in-out
                     ${isOpen 
@@ -44,20 +43,18 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                     }`}
       >
 
-        {/* Desktop Toggle button - repositioned and centered vertically */}
         <button
           onClick={onToggle}
           className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-[50%] z-20 w-8 h-8 rounded-full bg-emerald-500
-                     text-black shadow-xl items-center justify-center border-0
+                     text-white shadow-xl items-center justify-center border-0
                      cursor-pointer transition-all hover:scale-110 active:scale-95
                      ${!isOpen && 'right-[33px] translate-x-0'}`}
         >
           {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
 
-        {/* Profile */}
         <div className={`flex items-center gap-4 pb-6 transition-all duration-300 ${isOpen ? '' : 'sm:justify-center'} ${!isOpen && 'hidden sm:flex'}`}>
-          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-[0_5px_15px_rgba(16,185,129,0.3)] bg-emerald-500 flex items-center justify-center text-black font-black">
+          <div className="relative w-12 h-12 flex-shrink-0 rounded-[1.25rem] overflow-hidden border border-white/10 shadow-[0_5px_15px_rgba(16,185,129,0.3)] bg-emerald-500 flex items-center justify-center text-white font-black">
             {initials || 'U'}
           </div>
 
@@ -71,13 +68,11 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
           )}
         </div>
 
-        {/* Content */}
         <div className={`flex-1 overflow-y-auto no-scrollbar transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           {isOpen && (
             <div className="flex flex-col h-full">
               <div className="h-px bg-white/[0.08] my-2 mb-8" />
 
-              {/* Last Reported */}
               <div className="mb-8 pl-1">
                 <div className="flex items-center gap-2.5 text-[0.72rem] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">
                   <Clock size={13} strokeWidth={3} /> {t.lastReported}
@@ -102,7 +97,6 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                 )}
               </div>
 
-              {/* Leaderboard Button */}
               <button
                 onClick={onOpenLeaderboard}
                 className="mb-8 flex items-center gap-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] p-5 transition-all group cursor-pointer border-0 shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 active:translate-y-0"
@@ -118,7 +112,6 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
 
               <div className="h-px bg-white/[0.08] mb-8" />
 
-              {/* Your Impact */}
               <div className="mb-8 pr-1 pl-1">
                 <div className="text-[0.72rem] font-black uppercase tracking-[0.2em] text-slate-500 mb-5">
                   {t.yourImpact}
@@ -138,7 +131,6 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
           )}
         </div>
 
-        {/* Logout */}
         <button
           onClick={onLogout}
           className={`mt-auto flex items-center gap-3 px-5 py-4

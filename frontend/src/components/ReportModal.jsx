@@ -36,7 +36,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
       reportId
     };
     
-    // Convert photo to base64 if it exists
     if (photo) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -66,7 +65,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
       className="fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* Glass modal */}
       <div className="w-full max-w-md rounded-t-2xl sm:rounded-2xl
                       bg-black/60 backdrop-blur-3xl backdrop-saturate-150
                       border border-white/[0.05]
@@ -74,7 +72,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
                       p-7 flex flex-col gap-5
                       animate-[slideUp_0.3s_ease]">
 
-        {/* Header */}
         <div className="flex justify-between items-center">
           <span className="font-bold text-lg text-white/90">
             {isProof ? t.uploadProof : t.reportWaste}
@@ -89,7 +86,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
 
         {!isProof && (
           <>
-            {/* Severity */}
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.severity}</div>
               <div className="flex gap-2">
@@ -106,7 +102,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
               </div>
             </div>
 
-            {/* Location */}
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.locationRequired}</div>
               <div className={`flex items-center gap-2.5 bg-black/30 rounded-[1.5rem] px-5 py-3.5 border
@@ -138,7 +133,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
               </button>
             </div>
 
-            {/* Description */}
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.description}</div>
               <textarea
@@ -150,7 +144,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
               />
             </div>
 
-            {/* Landmark */}
             <div>
               <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">{t.landmarkLabel}</div>
               <input
@@ -164,7 +157,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
           </>
         )}
 
-        {/* Photo */}
         <div>
           <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/40 mb-2.5">
           {isProof ? `${t.after} ${(t.photoOptional ?? '(optional)').replace('(', '').replace(')', '')}` : (t.photoOptional ?? '(optional)')}
@@ -177,7 +169,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
           />
         </div>
 
-        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={(!isProof && locStatus !== 'ok') || !photo}

@@ -14,7 +14,6 @@ function MapClickCapture({ onMapClick }) {
   return null;
 }
 
-// Create a solid 'Gem' marker icon to fix drift issues & provide 'solid' feel
 const createSolidIcon = (color, size, isCleaning) => {
   return L.divIcon({
     className: 'solid-marker-container',
@@ -63,7 +62,6 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
           const isCleaned = report.status === 'cleaned';
           const isCleaning = report.status === 'in-progress';
           
-          // Cleaned/Cleared spots turn Grey. Active ones use severity color.
           const markerColor = isCleaned ? '#64748b' : (SEVERITY_COLOR[report.severity] || '#94a3b8');
           
           const size = report.severity === 'high' ? 28 : report.severity === 'medium' ? 22 : 18;
@@ -109,7 +107,6 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
                     ) : null}
                   </div>
 
-                  {/* Before/After Card - Shows if after photo exists regardless of official status */}
                   {report.after_image ? (
                     <div className="mb-4">
                       <div className="text-[0.65rem] font-black text-slate-500 uppercase tracking-widest mb-2.5">{t.compareImpact}</div>
@@ -197,7 +194,6 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
         })}
       </MapContainer>
 
-      {/* Legend */}
       <div className="absolute bottom-28 right-6 z-[1000]
                       bg-black/95 backdrop-blur-md
                       border border-white/[0.08] rounded-2xl px-5 py-4

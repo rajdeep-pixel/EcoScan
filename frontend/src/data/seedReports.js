@@ -1,4 +1,3 @@
-// Dummy seed reports — centred around SRMIST Kattankulathur (12.8231, 80.0444)
 export const SEED_REPORTS = [
   { 
     id: 1, lat: 12.8231, lng: 80.0444, severity: 'high', status: 'reported', 

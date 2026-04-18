@@ -47,7 +47,6 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
     <div className="fixed inset-0 overflow-hidden bg-black font-['Outfit'] search-cursor">
       <CursorGlow />
 
-      {/* Interactive Fluid Gradient Background Blobs */}
       <style>{`
         @keyframes blob-drift-1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
@@ -111,7 +110,6 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
         />
       </div>
 
-      {/* Language Switch - Top Right (Floating Style) */}
       <div className="fixed right-4 top-4 z-50 flex items-center gap-4 sm:right-6 sm:top-6 sm:gap-6 lg:right-10 lg:top-10">
         <button
           onClick={() => setLang('en')}
@@ -131,22 +129,20 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
 
       <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-[1500px] items-center justify-center px-4 py-4 sm:px-6 sm:py-6 md:px-8 lg:px-10 xl:px-14">
         <div className="flex w-full items-center justify-center gap-8 lg:justify-between xl:gap-12">
-          <div className="w-full max-w-[460px] animate-in fade-in slide-in-from-bottom-8 duration-1000 sm:max-w-[480px] lg:max-w-[500px]">
-            {/* Brand Header */}
-            <div className="mb-6 text-center sm:mb-8 lg:mb-10 lg:text-left">
-              <div className="relative mx-auto mb-2 flex w-full justify-center lg:mx-0 lg:justify-start">
+          <div className="w-full max-w-[460px] -translate-y-5 animate-in fade-in slide-in-from-bottom-8 duration-1000 sm:max-w-[480px] lg:max-w-[500px]">
+            <div className="mb-6 text-center sm:mb-8 lg:mb-10 w-full flex flex-col items-center">
+              <div className="relative z-10 mx-auto -mb-6 sm:-mb-8 lg:-mb-10 flex w-full justify-center pointer-events-none">
                 <img
                   src={ecoscanTitle}
                   alt="EcoScan"
-                  className="h-auto w-[min(100%,320px)] sm:w-[min(100%,370px)] md:w-[min(100%,410px)] lg:w-[clamp(22rem,27vw,30rem)] drop-shadow-[0_10px_35px_rgba(16,185,129,0.5)] filter-distressed pointer-events-none"
+                  className="h-auto w-[min(100%,450px)] sm:w-[min(100%,520px)] md:w-[min(100%,580px)] lg:w-[clamp(30rem,38vw,42rem)] drop-shadow-[0_10px_35px_rgba(16,185,129,0.5)] filter-distressed pointer-events-none origin-bottom"
                 />
               </div>
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.32em] text-emerald-500/80 sm:text-[0.72rem] sm:tracking-[0.4em] lg:pl-2">
+              <p className="relative z-20 text-center text-[0.68rem] font-bold uppercase tracking-[0.32em] text-emerald-500/80 sm:text-[0.72rem] sm:tracking-[0.4em] drop-shadow-md">
                 {t.tagline || t.heroSub}
               </p>
             </div>
 
-            {/* Dynamic Auth Card */}
             <div className="w-full rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 shadow-2xl backdrop-blur-3xl transition-all duration-500 hover:border-emerald-500/20 sm:rounded-[2.5rem] sm:p-4">
               <div className="mb-4 flex gap-2 rounded-3xl bg-black/40 p-2">
                 {['register', 'login'].map((m) => (
@@ -164,22 +160,24 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
               </div>
 
               <div className="space-y-3 p-1 sm:p-2">
-                {isRegisterMode && (
+                <div className="flex gap-2 sm:gap-3 w-full">
+                  {isRegisterMode && (
+                    <input
+                      type="text"
+                      placeholder={t.name || 'Full Name'}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full min-w-0 rounded-[1.35rem] border border-white/5 bg-black/30 px-4 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-5"
+                    />
+                  )}
                   <input
-                    type="text"
-                    placeholder={t.name || 'Full Name'}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-[1.35rem] border border-white/5 bg-black/30 px-5 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-6"
+                    type="email"
+                    placeholder={t.email || 'Email Address'}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full min-w-0 rounded-[1.35rem] border border-white/5 bg-black/30 px-4 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-5"
                   />
-                )}
-                <input
-                  type="email"
-                  placeholder={t.email || 'Email Address'}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-[1.35rem] border border-white/5 bg-black/30 px-5 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-6"
-                />
+                </div>
                 <input
                   type="password"
                   placeholder={isRegisterMode ? (t.enterPassword || 'Create a password') : (t.password || 'Password')}
@@ -244,15 +242,17 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
             </button>
           </div>
         </div>
-
       </div>
-      
-      <div className="absolute right-[-5%] md:right-[2%] top-1/2 -translate-y-1/2 w-[460px] md:w-[636px] lg:w-[726px] aspect-square pointer-events-none md:pointer-events-auto z-[5] hidden sm:block">
-        <Suspense fallback={null}>
-          <Globe />
-        </Suspense>
+
+      <div className="relative hidden flex-1 items-center justify-end lg:flex">
+        <div className="pointer-events-none relative aspect-square w-[min(40vw,700px)] min-w-[320px] max-w-[700px] xl:w-[min(42vw,760px)]">
+          <Suspense fallback={null}>
+            <Globe />
+          </Suspense>
+        </div>
       </div>
     </div>
-
+  </div>
+</div>
   );
 }

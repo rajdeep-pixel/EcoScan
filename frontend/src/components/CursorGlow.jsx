@@ -25,7 +25,6 @@ export default function CursorGlow() {
     resize();
 
     const render = () => {
-      // Smooth interpolation (Magnetism/Lag)
       const easedX = pos.current.x + (mouse.current.x - pos.current.x) * 0.064;
       const easedY = pos.current.y + (mouse.current.y - pos.current.y) * 0.064;
       pos.current = { x: easedX, y: easedY };
@@ -39,7 +38,6 @@ export default function CursorGlow() {
           pos.current.x, pos.current.y, radius
         );
         
-        // Midnight Emerald Glow
         gradient.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
         gradient.addColorStop(0.5, 'rgba(16, 185, 129, 0.06)');
         gradient.addColorStop(1, 'transparent');
@@ -49,7 +47,6 @@ export default function CursorGlow() {
         ctx.arc(pos.current.x, pos.current.y, radius, 0, Math.PI * 2);
         ctx.fill();
         
-        // Inner Core Glow
         const coreGradient = ctx.createRadialGradient(
           pos.current.x, pos.current.y, 0,
           pos.current.x, pos.current.y, 180

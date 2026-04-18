@@ -57,7 +57,6 @@ export default function App() {
     }
     loadReports();
 
-    // --- REAL-TIME WEBSOCKET HANDLER ---
     const socketUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/updates';
     const socket = new WebSocket(socketUrl);
 
@@ -66,7 +65,6 @@ export default function App() {
         const data = JSON.parse(event.data);
         if (data.type === 'NEW_REPORT') {
           setReports(prev => {
-            // Avoid duplicates
             if (prev.some(r => r.id === data.report.id)) return prev;
             return [data.report, ...prev];
           });

@@ -34,13 +34,11 @@ function LocationPin({ position }) {
   );
 }
 
-// Scattered internal dots to fill the globe
 function InternalParticles() {
   const geo = useMemo(() => {
     const positions = [];
     const count = 200;
     for (let i = 0; i < count; i++) {
-      // Random points inside a sphere
       const r = Math.random() * 1.5;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
@@ -62,21 +60,17 @@ function InternalParticles() {
   );
 }
 
-// Internal ring/orbit lines
 function InternalRings() {
   return (
     <>
-      {/* Equatorial ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.2, 1.21, 64]} />
         <meshBasicMaterial color="#10b981" transparent opacity={0.15} side={THREE.DoubleSide} />
       </mesh>
-      {/* Tilted ring */}
       <mesh rotation={[Math.PI / 3, Math.PI / 4, 0]}>
         <ringGeometry args={[1.0, 1.01, 64]} />
         <meshBasicMaterial color="#10b981" transparent opacity={0.1} side={THREE.DoubleSide} />
       </mesh>
-      {/* Another tilted ring */}
       <mesh rotation={[Math.PI / 2.5, -Math.PI / 3, Math.PI / 6]}>
         <ringGeometry args={[0.8, 0.81, 64]} />
         <meshBasicMaterial color="#34d399" transparent opacity={0.08} side={THREE.DoubleSide} />
@@ -100,7 +94,6 @@ function GlobeMesh() {
 
   return (
     <group ref={groupRef}>
-      {/* Wireframe globe shell — clean grid, no continents */}
       <mesh>
         <sphereGeometry args={[1.7, 36, 36]} />
         <meshBasicMaterial
@@ -111,7 +104,6 @@ function GlobeMesh() {
         />
       </mesh>
 
-      {/* Inner glow core */}
       <mesh>
         <sphereGeometry args={[0.4, 16, 16]} />
         <meshBasicMaterial color="#10b981" transparent opacity={0.15} />
@@ -121,13 +113,10 @@ function GlobeMesh() {
         <meshBasicMaterial color="#34d399" transparent opacity={0.25} />
       </mesh>
 
-      {/* Internal scattered particles */}
       <InternalParticles />
 
-      {/* Internal orbit rings */}
       <InternalRings />
 
-      {/* Location Pins */}
       {markers.map((pos, i) => <LocationPin key={i} position={pos} />)}
     </group>
   );
