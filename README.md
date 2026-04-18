@@ -1,187 +1,99 @@
+# 🌍 EcoScan: AI-Powered Community Waste Management
 
-🌍 EcoScan
-Connecting Citizens, Volunteers, and Authorities to Clean Our Cities.
+![EcoScan Banner](https://img.shields.io/badge/Status-Active-emerald?style=for-the-badge)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)
 
-EcoScan is a high-speed reporting tool developed for GDG DevFest: Kernel Panic Round 1. It maps urban garbage dumping sites in real-time and coordinates community-led cleanup efforts through a seamless, data-driven interface.
+**EcoScan** is a real-time, gamified platform designed to empower communities to report, verify, and clean up local waste. By combining geolocation, real-time WebSocket synchronization, and advanced AI vision models, EcoScan bridges the gap between civic reporting and actual environmental action.
 
-🚀 The Challenge
-Urban neighborhoods often suffer from rampant garbage dumping with no clear data on severity or location. EcoScan bridges this gap by providing:
+## ✨ Key Features
 
-Citizens: A fast, geolocation-based tool to report waste.
+* **📍 Real-Time Geospatial Mapping:** Drop pins on an interactive map to report waste severity (Low, Medium, High).
+* **🤖 AI Cleanup Verification:** Volunteers upload "after" photos. Our integrated Groq Vision LLM automatically analyzes the before/after photos to verify if the cleanup is legitimate before awarding points.
+* **⚡ Live Synchronization:** Built on WebSockets, the map and leaderboards update instantly across all connected clients without needing to refresh.
+* **🏆 Gamification & Leaderboards:** Volunteers earn points based on the severity of the waste they clean, driving community engagement through competitive leaderboards.
+* **🌐 Multilingual Support:** Seamlessly toggle between English and Hindi to maximize accessibility.
+* **✨ Premium 3D UI:** Features an optimized WebGL Three.js interactive globe and fluid glassmorphism design.
 
-Volunteers: A real-time map to claim, track, and clean spots.
+---
 
-Authorities: A comprehensive dashboard to monitor urban hygiene trends and progress.
+## 🛠️ Tech Stack & Architecture
 
-✨ Key Features
-📍 Report a Spot: Pin waste locations via the browser's Geolocation API, upload photo evidence, and rate severity (Low/Medium/High).
+### **Backend & Database**
+* **Framework:** Python 3, FastAPI, Uvicorn (ASGI)
+* **Database:** PostgreSQL (Neon Serverless), SQLAlchemy ORM
+* **Real-Time Engine:** FastAPI Native WebSockets
+* **AI Integration:** Groq API (`llama-4-scout-17b-16e-instruct` Vision Model)
+* **Security:** PBKDF2 HMAC SHA-256 password hashing, Custom Token Auth
 
-🗺️ Interactive Map View: A dynamic map rendering real-world coordinates with color-coded markers based on urgency.
+### **Frontend**
+* **Framework:** React 18, Vite
+* **Mapping:** React-Leaflet, Leaflet.js, Google Maps Tile API
+* **3D Graphics:** Three.js, `@react-three/fiber`, `@react-three/drei`
+* **Styling:** Tailwind CSS, Custom CSS (Fluid keyframes, Canvas Canvas manipulation)
+* **Networking:** Axios with global interceptors
 
-🤝 Volunteer Action: Volunteers can "claim" spots, updating the status to In Progress in real-time to prevent overlapping efforts.
+---
 
-📊 Live Dashboard: A status monitor showing live counts for Total Reported, In Progress, and Cleaned spots.
+## 👥 The Team
 
-🏆 Leaderboard: Gamified participation tracking to encourage and reward top community volunteers.
+EcoScan was architected and developed by a dedicated team focused on scalable software and premium user experiences.
 
-🛠️ Tech Stack
-Backend
+* **Shreyas** — *Backend & Database Architect*
+  * Designed the PostgreSQL schema, built the FastAPI backend, implemented real-time WebSocket broadcasting, and engineered the AI vision integration.
+* **Rajdeep** — *Frontend Developer*
+  * Developed the React application, integrated the Leaflet mapping system, managed global state, and engineered the WebGL/Three.js visualizations.
+* **Tulsi** — *UI/UX Designer*
+  * Designed the user journey, crafted the glassmorphism aesthetic, created fluid animations, and ensured a highly accessible, mobile-responsive layout.
 
-FastAPI: High-performance Python framework for asynchronous API handling.
+---
 
-PostgreSQL: Relational database for structured data and spatial integrity.
+## 🚀 Local Development Setup
 
-SQLAlchemy: ORM for database modeling and seamless migrations.
+To run EcoScan locally, you will need two terminal windows—one for the FastAPI backend and one for the React frontend.
 
-Pydantic: Strict data validation ensuring high-quality, schema-compliant reporting.
-
-Frontend
-
-React + Vite: For a blazing-fast, responsive user interface.
-
-Tailwind CSS: For rapid, utility-first UI development.
-
-Leaflet.js: Real-world coordinate mapping and interactive spatial visualization.
-
-🏗️ Architecture Decisions
-Modular API: Built using FastAPI's APIRouter to isolate "rolling requirements" from core MVP logic, ensuring scalability.
-
-Stateless Design: Utilizes PATCH requests that return updated objects, allowing the frontend to reflect state changes instantly without reloads.
-
-Strict Geospatial Constraints: Enforced use of the Geolocation API for coordinate accuracy, preventing manual text-box "spoofing" and ensuring data reliability.
-
-📦 Installation & Setup
-Backend
-Navigate to the backend directory:
-
-Bash```
+## 1. Backend Setup
+```bash
 cd backend
 ```
-Install dependencies:
-
-Bash```
+## Create and activate a virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+## Install dependencies
+```bash
 pip install -r requirements.txt
 ```
-Run the development server:
-
-Bash```
+## Start the server
+```bash
 uvicorn main:app --reload
 ```
-Frontend
-Navigate to the frontend directory:
 
-Bash```
+## 2. Frontend Setup
+```bash
 cd frontend
-```
-Install dependencies:
 
-Bash ```
+# Install dependencies
 npm install
-```
 
-Run the development server:
-
-Bash```
+# Start the Vite development server
 npm run dev
 ```
+## 3. Environment Variables
+### Create a .env file in your backend/ directory:
 
-👥 The Team
-
-Shreyas (@shreyascode11) – Backend & Database Architect
-
-Rajdeep (@rajdeep-pixel) – Frontend & UI/UX Engineer
-
-=======
-
-🌍 EcoScan
-Connecting Citizens, Volunteers, and Authorities to Clean Our Cities.
-
-EcoScan is a high-speed reporting tool developed for GDG DevFest: Kernel Panic Round 1. It maps urban garbage dumping sites in real-time and coordinates community-led cleanup efforts through a seamless, data-driven interface.
-
-🚀 The Challenge
-Urban neighborhoods often suffer from rampant garbage dumping with no clear data on severity or location. EcoScan bridges this gap by providing:
-
-Citizens: A fast, geolocation-based tool to report waste.
-
-Volunteers: A real-time map to claim, track, and clean spots.
-
-Authorities: A comprehensive dashboard to monitor urban hygiene trends and progress.
-
-✨ Key Features
-📍 Report a Spot: Pin waste locations via the browser's Geolocation API, upload photo evidence, and rate severity (Low/Medium/High).
-
-🗺️ Interactive Map View: A dynamic map rendering real-world coordinates with color-coded markers based on urgency.
-
-🤝 Volunteer Action: Volunteers can "claim" spots, updating the status to In Progress in real-time to prevent overlapping efforts.
-
-📊 Live Dashboard: A status monitor showing live counts for Total Reported, In Progress, and Cleaned spots.
-
-🏆 Leaderboard: Gamified participation tracking to encourage and reward top community volunteers.
-
-🛠️ Tech Stack
-Backend
-
-FastAPI: High-performance Python framework for asynchronous API handling.
-
-PostgreSQL: Relational database for structured data and spatial integrity.
-
-SQLAlchemy: ORM for database modeling and seamless migrations.
-
-Pydantic: Strict data validation ensuring high-quality, schema-compliant reporting.
-
-Frontend
-
-React + Vite: For a blazing-fast, responsive user interface.
-
-Tailwind CSS: For rapid, utility-first UI development.
-
-Leaflet.js: Real-world coordinate mapping and interactive spatial visualization.
-
-🏗️ Architecture Decisions
-Modular API: Built using FastAPI's APIRouter to isolate "rolling requirements" from core MVP logic, ensuring scalability.
-
-Stateless Design: Utilizes PATCH requests that return updated objects, allowing the frontend to reflect state changes instantly without reloads.
-
-Strict Geospatial Constraints: Enforced use of the Geolocation API for coordinate accuracy, preventing manual text-box "spoofing" and ensuring data reliability.
-
-📦 Installation & Setup
-Backend
-Navigate to the backend directory:
-
-Bash```
-cd backend
+```bash
+GROQ_API_KEY=your_groq_api_key_here
+DATABASE_URL=postgresql://user:password@host/dbname
 ```
-Install dependencies:
-
-Bash```
-pip install -r requirements.txt
+### Create a .env file in your frontend/ directory:
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+VITE_WS_URL=ws://localhost:8000/ws/updates
 ```
-Run the development server:
+---
 
-Bash```
-uvicorn main:app --reload
-```
-Frontend
-Navigate to the frontend directory:
-
-Bash```
-cd frontend
-```
-Install dependencies:
-
-Bash ```
-npm install
-```
-
-Run the development server:
-
-Bash```
-npm run dev
-```
-
-👥 The Team
-
-Shreyas (@shreyascode11) – Backend & Database Architect
-
-Rajdeep (@rajdeep-pixel) – Frontend & UI/UX Engineer
-Tulsi – (@itsTulsi) - Pitch & Presentation Lead
+## 🔒 License
+This project is proprietary. All rights reserved by the EcoScan team.
