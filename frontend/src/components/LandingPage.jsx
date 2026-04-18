@@ -4,20 +4,29 @@ import ecoscanTitle from '../assets/ecoscan_title.png';
 
 const Globe = lazy(() => import('./Globe'));
 
-export default function LandingPage({ onAuthenticate, t, lang, setLang, loading }) {
+export default function LandingPage({ onAuthenticate, t, lang, setLang, loading, authError }) {
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('citizen');
+  const [showValidation, setShowValidation] = useState(false);
+
+  const isRegisterMode = mode === 'register';
+  const passwordHint = isRegisterMode
+    ? (t.passwordMinHint || 'Use at least 8 characters.')
+    : (t.passwordLoginHint || 'Use the password you registered with.');
+  const isFormValid = (!isRegisterMode || name.trim()) && email.trim() && password.trim() && (!isRegisterMode || password.length >= 8);
 
   const handleStart = () => {
-    if (mode === 'register' && !name.trim()) {
-      alert(t.userNameRequired);
+    setShowValidation(true);
+    if (isRegisterMode && !name.trim()) {
       return;
     }
     if (!email.trim() || !password.trim()) {
-      alert(t.authFieldsRequired);
+      return;
+    }
+    if (isRegisterMode && password.length < 8) {
       return;
     }
     onAuthenticate({
@@ -29,8 +38,13 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
     });
   };
 
+  const handleModeChange = (nextMode) => {
+    setMode(nextMode);
+    setShowValidation(false);
+  };
+
   return (
-    <div className="fixed inset-0 flex flex-col items-start justify-center overflow-hidden font-['Outfit'] bg-black pl-10 md:pl-24 lg:pl-32 search-cursor">
+    <div className="fixed inset-0 overflow-hidden bg-black font-['Outfit'] search-cursor">
       <CursorGlow />
 
       {/* Interactive Fluid Gradient Background Blobs */}
@@ -98,7 +112,7 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
       </div>
 
       {/* Language Switch - Top Right (Floating Style) */}
-      <div className="fixed top-10 right-10 z-50 flex items-center gap-6">
+      <div className="fixed right-4 top-4 z-50 flex items-center gap-4 sm:right-6 sm:top-6 sm:gap-6 lg:right-10 lg:top-10">
         <button
           onClick={() => setLang('en')}
           className={`text-[0.75rem] font-black tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer border-0 bg-transparent
@@ -115,113 +129,132 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
         </button>
       </div>
 
-      <div className="relative z-20 flex flex-col items-center max-w-[440px] w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 -translate-y-20">
-        {/* Brand Header */}
-        <div className="mb-12 group">
-          <div className="text-center">
-            
-            <div className="relative -mb-16 select-none flex justify-center z-30 translate-y-12 pointer-events-none">
-              <img 
-                src={ecoscanTitle} 
-                alt="EcoScan" 
-                className="w-[130%] h-auto max-w-[600px] drop-shadow-[0_10px_35px_rgba(16,185,129,0.5)] filter-distressed pointer-events-none transform origin-bottom" 
-              />
-            </div>
-            <div className="flex items-center justify-center gap-3 relative z-20">
-              <p className="text-[0.7rem] font-bold tracking-[0.4em] text-emerald-500/80 uppercase">
+      <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-[1500px] items-center justify-center px-4 py-4 sm:px-6 sm:py-6 md:px-8 lg:px-10 xl:px-14">
+        <div className="flex w-full items-center justify-center gap-8 lg:justify-between xl:gap-12">
+          <div className="w-full max-w-[460px] animate-in fade-in slide-in-from-bottom-8 duration-1000 sm:max-w-[480px] lg:max-w-[500px]">
+            {/* Brand Header */}
+            <div className="mb-6 text-center sm:mb-8 lg:mb-10 lg:text-left">
+              <div className="relative mx-auto mb-2 flex w-full justify-center lg:mx-0 lg:justify-start">
+                <img
+                  src={ecoscanTitle}
+                  alt="EcoScan"
+                  className="h-auto w-[min(100%,320px)] sm:w-[min(100%,370px)] md:w-[min(100%,410px)] lg:w-[clamp(22rem,27vw,30rem)] drop-shadow-[0_10px_35px_rgba(16,185,129,0.5)] filter-distressed pointer-events-none"
+                />
+              </div>
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.32em] text-emerald-500/80 sm:text-[0.72rem] sm:tracking-[0.4em] lg:pl-2">
                 {t.tagline || t.heroSub}
               </p>
             </div>
-          </div>
-        </div>
 
-        {/* Dynamic Auth Card */}
-        <div className="w-full bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] p-3 border border-white/10 shadow-2xl relative overflow-hidden group/card transition-all duration-500 hover:border-emerald-500/20">
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
-          
-          {/* Mode Toggle */}
-          <div className="flex p-2 gap-2 mb-4 bg-black/40 rounded-3xl relative z-10">
-            {['register', 'login'].map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 py-3 px-6 rounded-2xl text-[0.7rem] font-black tracking-widest uppercase transition-all duration-500
-                  ${mode === m 
-                    ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                    : 'text-white/40 hover:text-white/60 hover:bg-white/5'}`}
-              >
-                {t[m]}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-3 p-2 relative z-10">
-            {mode === 'register' && (
-              <input
-                type="text"
-                placeholder={t.name || "Full Name"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
-              />
-            )}
-            <input
-              type="email"
-              placeholder={t.email || "Email Address"}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
-            />
-            <input
-              type="password"
-              placeholder={t.password || "Password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
-            />
-
-            {mode === 'register' && (
-              <div className="flex gap-2 bg-black/20 p-2 rounded-2xl border border-white/5">
-                {['citizen', 'volunteer'].map((r) => (
+            {/* Dynamic Auth Card */}
+            <div className="w-full rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 shadow-2xl backdrop-blur-3xl transition-all duration-500 hover:border-emerald-500/20 sm:rounded-[2.5rem] sm:p-4">
+              <div className="mb-4 flex gap-2 rounded-3xl bg-black/40 p-2">
+                {['register', 'login'].map((m) => (
                   <button
-                    key={r}
-                    onClick={() => setRole(r)}
-                    className={`flex-1 py-3 rounded-xl text-[0.65rem] font-bold tracking-widest uppercase transition-all
-                      ${role === r ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/30 hover:text-white/50'}`}
+                    key={m}
+                    onClick={() => handleModeChange(m)}
+                    className={`flex-1 rounded-2xl px-4 py-3 text-[0.68rem] font-black uppercase tracking-[0.18em] transition-all duration-500 sm:px-6 sm:text-[0.72rem]
+                      ${mode === m
+                        ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                        : 'text-white/40 hover:bg-white/5 hover:text-white/60'}`}
                   >
-                    {t[r]}
+                    {t[m]}
                   </button>
                 ))}
               </div>
-            )}
 
-            <button
-              onClick={handleStart}
-              disabled={loading}
-              className="w-full bg-emerald-500 hover:bg-emerald-400 text-black rounded-[1.5rem] py-4 px-6 font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              ) : (
-                <>
-                  {mode === 'register' ? (t.createAccount || 'Create Account') : (t.login || 'Login')}
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </>
-              )}
-            </button>
+              <div className="space-y-3 p-1 sm:p-2">
+                {isRegisterMode && (
+                  <input
+                    type="text"
+                    placeholder={t.name || 'Full Name'}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full rounded-[1.35rem] border border-white/5 bg-black/30 px-5 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-6"
+                  />
+                )}
+                <input
+                  type="email"
+                  placeholder={t.email || 'Email Address'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-[1.35rem] border border-white/5 bg-black/30 px-5 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-6"
+                />
+                <input
+                  type="password"
+                  placeholder={isRegisterMode ? (t.enterPassword || 'Create a password') : (t.password || 'Password')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-[1.35rem] border border-white/5 bg-black/30 px-5 py-4 text-sm font-medium text-white transition-all placeholder:text-white/40 focus:border-emerald-500/40 focus:outline-none sm:px-6"
+                />
+
+                <div className="flex items-center justify-between gap-3 px-1 text-[0.72rem] text-white/45">
+                  <span>{passwordHint}</span>
+                  {isRegisterMode && password.length > 0 && password.length < 8 && (
+                    <span className="text-amber-300/90">{t.passwordTooShort || 'Minimum 8 characters'}</span>
+                  )}
+                </div>
+
+                {isRegisterMode && (
+                  <div className="flex gap-2 rounded-2xl border border-white/5 bg-black/20 p-2">
+                    {['citizen', 'volunteer'].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setRole(r)}
+                        className={`flex-1 rounded-xl py-3 text-[0.65rem] font-bold uppercase tracking-widest transition-all
+                          ${role === r ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/30 hover:text-white/50'}`}
+                      >
+                        {t[r]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {showValidation && !isFormValid && (
+                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-white/60">
+                    {isRegisterMode && !name.trim()
+                      ? (t.userNameRequired || 'Please enter your name to continue.')
+                      : !email.trim() || !password.trim()
+                        ? (t.authFieldsRequired || 'Please fill in email and password.')
+                        : (t.passwordTooShort || 'Minimum 8 characters')}
+                  </div>
+                )}
+
+                {authError && (
+                  <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                    {authError}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleStart}
+                  disabled={loading || !isFormValid}
+                  className="mt-4 flex w-full items-center justify-center gap-3 rounded-[1.4rem] bg-emerald-500 px-6 py-4 text-sm font-black uppercase tracking-widest text-black shadow-[0_10px_30px_rgba(16,185,129,0.2)] transition-all hover:-translate-y-1 hover:bg-emerald-400 hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/20 border-t-black" />
+                  ) : (
+                    <>
+                      {isRegisterMode ? (t.createAccount || 'Create Account') : (t.login || 'Login')}
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative hidden flex-1 items-center justify-end lg:flex">
+            <div className="pointer-events-none relative aspect-square w-[min(40vw,700px)] min-w-[320px] max-w-[700px] xl:w-[min(42vw,760px)]">
+              <Suspense fallback={null}>
+                <Globe />
+              </Suspense>
+            </div>
           </div>
         </div>
-
-      </div>
-      
-      <div className="absolute right-[-5%] md:right-[2%] top-1/2 -translate-y-1/2 w-[460px] md:w-[636px] lg:w-[726px] aspect-square pointer-events-none md:pointer-events-auto z-[5] hidden sm:block">
-        <Suspense fallback={null}>
-          <Globe />
-        </Suspense>
       </div>
     </div>
-
   );
 }

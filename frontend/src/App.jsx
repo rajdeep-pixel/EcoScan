@@ -31,6 +31,7 @@ export default function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [mapMode, setMapMode] = useState(localStorage.getItem('ecoScanMapMode') || 'street');
 
   const t = { ...translations.en, ...(translations[lang] || {}) };
@@ -126,8 +127,26 @@ export default function App() {
     setLoading(false);
   }
 
+  function formatApiError(error, fallbackMessage) {
+    const detail = error?.response?.data?.detail;
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail;
+    }
+    if (Array.isArray(detail) && detail.length > 0) {
+      return detail
+        .map((item) => {
+          const fieldPath = Array.isArray(item?.loc) ? item.loc.slice(1).join(' ') : '';
+          const message = item?.msg || 'Invalid input';
+          return fieldPath ? `${fieldPath}: ${message}` : message;
+        })
+        .join('. ');
+    }
+    return fallbackMessage;
+  }
+
   async function handleAuthenticate(credentials) {
     setAuthLoading(true);
+    setAuthError('');
     try {
       const response = credentials.mode === 'register'
         ? await registerUser(credentials)
@@ -140,7 +159,7 @@ export default function App() {
       sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
       setSession(nextSession);
     } catch (error) {
-      alert(error?.response?.data?.detail || t.authFailed);
+      setAuthError(formatApiError(error, t.authFailed));
     } finally {
       setAuthLoading(false);
     }
@@ -229,7 +248,16 @@ export default function App() {
   }
 
   if (!session?.token) {
-    return <LandingPage onAuthenticate={handleAuthenticate} t={t} lang={lang} setLang={setLang} loading={authLoading} />;
+    return (
+      <LandingPage
+        onAuthenticate={handleAuthenticate}
+        t={t}
+        lang={lang}
+        setLang={setLang}
+        loading={authLoading}
+        authError={authError}
+      />
+    );
   }
 
   const sidebarWidth = isSidebarOpen ? 312 : 67;

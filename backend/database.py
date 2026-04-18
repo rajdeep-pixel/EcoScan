@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, create_engine, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().with_name(".env"), override=True)
 
 # Database Setup
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ecoscan.db")
