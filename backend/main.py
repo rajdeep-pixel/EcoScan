@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import json
 import secrets
 import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from contextlib import asynccontextmanager
+from sqlalchemy.exc import IntegrityError
 
 from ai_review import review_cleanup_images
 from database import ReportModel, SessionLocal, User, ensure_schema
@@ -167,6 +169,7 @@ def serialize_user(user: User) -> dict:
         "role": user.role,
         "score": user.total_score,
         "cleanups": user.cleanup_count,
+        "reports": user.report_count,
     }
 
 
@@ -225,21 +228,34 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.post("/auth/register")
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    # 1. Check if email is already taken
     existing_email = db.query(User).filter(User.email == payload.email.lower()).first()
     if existing_email:
         raise HTTPException(status_code=409, detail="Email is already registered")
 
-    user = User(
-        name=payload.name.strip(),
-        email=payload.email.lower(),
-        password_hash=hash_password(payload.password),
-        role=normalize_role(payload.role),
-    )
-    token = issue_auth_token(user)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return {"token": token, "user": serialize_user(user)}
+    # 2. Check if name is already taken (important for legacy data)
+    existing_name = db.query(User).filter(User.name == payload.name.strip()).first()
+    if existing_name:
+        raise HTTPException(status_code=409, detail="Username is already taken")
+
+    try:
+        user = User(
+            name=payload.name.strip(),
+            email=payload.email.lower(),
+            password_hash=hash_password(payload.password),
+            role=normalize_role(payload.role),
+        )
+        token = issue_auth_token(user)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"token": token, "user": serialize_user(user)}
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Username or email already exists")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/auth/login")
@@ -283,13 +299,21 @@ async def create_report(
         verification_status="not-started",
     )
     db.add(new_report)
+    current_user.report_count += 1
     db.commit()
     db.refresh(new_report)
+    db.refresh(current_user)
+    
+    await manager.broadcast(json.dumps({
+        "type": "NEW_REPORT",
+        "report": serialize_report(new_report)
+    }))
+    
     return serialize_report(new_report)
 
 
 @app.patch("/reports/{report_id}/claim")
-def claim_report(
+async def claim_report(
     report_id: int,
     current_user: User = Depends(require_volunteer),
     db: Session = Depends(get_db),
@@ -305,6 +329,12 @@ def claim_report(
     report.claimed_by_id = current_user.id
     db.commit()
     db.refresh(report)
+    
+    await manager.broadcast(json.dumps({
+        "type": "REPORT_UPDATED", 
+        "report": serialize_report(report)
+    }))
+    
     return serialize_report(report)
 
 
@@ -352,6 +382,12 @@ async def clean_report(
     db.commit()
     db.refresh(report)
     db.refresh(current_user)
+
+    await manager.broadcast(json.dumps({
+        "type": "REPORT_UPDATED",
+        "report": serialize_report(report)
+    }))
+
     return {
         "report": serialize_report(report),
         "points_awarded": points,

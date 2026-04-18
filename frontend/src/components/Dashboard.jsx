@@ -1,4 +1,4 @@
-import logo from '../assets/logo.png';
+import ecoscanTitle from '../assets/ecoscan_title.png';
 import { Menu, Map, Globe } from 'lucide-react';
 
 export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, mapMode, setMapMode, userName }) {
@@ -12,10 +12,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
       
       {/* 1. Left Section: Branding */}
       <div className="flex items-center gap-4 group flex-shrink-0">
-        <img src={logo} alt="EcoScan Logo" className="w-11 h-11 object-contain transition-transform group-hover:scale-110" />
-        <h1 className="text-2xl font-black tracking-tighter m-0 leading-none bg-gradient-to-br from-white to-emerald-700 bg-clip-text text-transparent">
-          {t.appTitle}
-        </h1>
+        <img src={ecoscanTitle} alt="EcoScan Logo" className="h-6 w-auto object-contain transition-transform group-hover:scale-105" />
       </div>
 
       {/* 2. Middle Section: Centered Controls (Floating Look) */}
@@ -66,7 +63,6 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
           </div>
       </div>
 
-      {/* 3. Right Section: Stats (Floating Look - Background-free) */}
       <div className="flex items-center gap-10 flex-shrink-0">
         <div className="hidden lg:flex items-center gap-8 transition-all">
           {[

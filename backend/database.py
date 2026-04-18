@@ -27,6 +27,7 @@ class User(Base):
     auth_token = Column(String, nullable=True)
     total_score = Column(Integer, default=0)
     cleanup_count = Column(Integer, default=0)
+    report_count = Column(Integer, default=0)
     claimed_reports = relationship(
         "ReportModel", back_populates="cleaner",
         foreign_keys="ReportModel.claimed_by_id"
@@ -82,6 +83,7 @@ def ensure_schema():
             ("auth_token", "ALTER TABLE users ADD COLUMN auth_token VARCHAR"),
             ("total_score", "ALTER TABLE users ADD COLUMN total_score INTEGER DEFAULT 0"),
             ("cleanup_count", "ALTER TABLE users ADD COLUMN cleanup_count INTEGER DEFAULT 0"),
+            ("report_count", "ALTER TABLE users ADD COLUMN report_count INTEGER DEFAULT 0"),
         ],
         "reports": [
             ("status", "ALTER TABLE reports ADD COLUMN status VARCHAR DEFAULT 'reported'"),

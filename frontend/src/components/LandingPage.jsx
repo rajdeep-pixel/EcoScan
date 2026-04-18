@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import logo from '../assets/logo.png';
+import { useState, Suspense, lazy } from 'react';
 import CursorGlow from './CursorGlow';
+import ecoscanTitle from '../assets/ecoscan_title.png';
+
+const Globe = lazy(() => import('./Globe'));
 
 export default function LandingPage({ onAuthenticate, t, lang, setLang, loading }) {
   const [mode, setMode] = useState('register');
@@ -31,6 +33,70 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
     <div className="fixed inset-0 flex flex-col items-start justify-center overflow-hidden font-['Outfit'] bg-black pl-10 md:pl-24 lg:pl-32 search-cursor">
       <CursorGlow />
 
+      {/* Interactive Fluid Gradient Background Blobs */}
+      <style>{`
+        @keyframes blob-drift-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(80px, -60px) scale(1.1); }
+          50% { transform: translate(-40px, 80px) scale(0.95); }
+          75% { transform: translate(60px, 40px) scale(1.05); }
+        }
+        @keyframes blob-drift-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(-70px, 50px) scale(1.08); }
+          50% { transform: translate(60px, -70px) scale(0.92); }
+          75% { transform: translate(-30px, -40px) scale(1.12); }
+        }
+        @keyframes blob-drift-3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(50px, 70px) scale(1.15); }
+          66% { transform: translate(-60px, -30px) scale(0.9); }
+        }
+        @keyframes blob-drift-4 {
+          0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+          25% { transform: translate(-50px, -70px) scale(1.1) rotate(5deg); }
+          50% { transform: translate(70px, 30px) scale(0.95) rotate(-5deg); }
+          75% { transform: translate(20px, -50px) scale(1.08) rotate(3deg); }
+        }
+      `}</style>
+      <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
+        <div
+          className="absolute top-[5%] left-[2%] w-[500px] h-[500px] rounded-full opacity-30"
+          style={{
+            background: '#10b981',
+            filter: 'blur(100px)',
+            animation: 'blob-drift-1 14s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute bottom-[5%] right-[15%] w-[450px] h-[450px] rounded-full opacity-25"
+          style={{
+            background: '#14b8a6',
+            filter: 'blur(90px)',
+            animation: 'blob-drift-2 18s ease-in-out infinite',
+            animationDelay: '2s',
+          }}
+        />
+        <div
+          className="absolute top-[40%] left-[30%] w-[400px] h-[400px] rounded-full opacity-20"
+          style={{
+            background: '#34d399',
+            filter: 'blur(110px)',
+            animation: 'blob-drift-3 20s ease-in-out infinite',
+            animationDelay: '5s',
+          }}
+        />
+        <div
+          className="absolute top-[8%] right-[5%] w-[350px] h-[350px] rounded-full opacity-35"
+          style={{
+            background: '#065f46',
+            filter: 'blur(80px)',
+            animation: 'blob-drift-4 16s ease-in-out infinite',
+            animationDelay: '3s',
+          }}
+        />
+      </div>
+
       {/* Language Switch - Top Right (Floating Style) */}
       <div className="fixed top-10 right-10 z-50 flex items-center gap-6">
         <button
@@ -49,23 +115,22 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
         </button>
       </div>
 
-      <div className="relative z-20 flex flex-col items-center max-w-[440px] w-full animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        {/* Animated Brand Header */}
+      <div className="relative z-20 flex flex-col items-center max-w-[440px] w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 -translate-y-20">
+        {/* Brand Header */}
         <div className="mb-12 group">
-          <div className="relative mb-6 transform transition-transform duration-700 group-hover:scale-105">
-            <div className="absolute -inset-4 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700" />
-            <img src={logo} alt="EcoScan" className="relative w-48 h-auto drop-shadow-[0_0_25px_rgba(16,185,129,0.3)]" />
-          </div>
           <div className="text-center">
-            <h1 className="text-6xl font-black tracking-tighter mb-3 bg-gradient-to-b from-white via-white to-emerald-400 bg-clip-text text-transparent drop-shadow-sm leading-tight">
-              EcoScan
-            </h1>
-            <div className="flex items-center justify-center gap-3">
-              <div className="h-[1px] w-8 bg-emerald-500/30" />
+            
+            <div className="relative -mb-16 select-none flex justify-center z-30 translate-y-12 pointer-events-none">
+              <img 
+                src={ecoscanTitle} 
+                alt="EcoScan" 
+                className="w-[130%] h-auto max-w-[600px] drop-shadow-[0_10px_35px_rgba(16,185,129,0.5)] filter-distressed pointer-events-none transform origin-bottom" 
+              />
+            </div>
+            <div className="flex items-center justify-center gap-3 relative z-20">
               <p className="text-[0.7rem] font-bold tracking-[0.4em] text-emerald-500/80 uppercase">
-                {t.heroSub}
+                {t.tagline || t.heroSub}
               </p>
-              <div className="h-[1px] w-8 bg-emerald-500/30" />
             </div>
           </div>
         </div>
@@ -94,25 +159,25 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
             {mode === 'register' && (
               <input
                 type="text"
-                placeholder={t.namePlaceholder}
+                placeholder={t.name || "Full Name"}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+                className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
               />
             )}
             <input
               type="email"
-              placeholder={t.emailPlaceholder}
+              placeholder={t.email || "Email Address"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
             />
             <input
               type="password"
-              placeholder={t.passwordPlaceholder}
+              placeholder={t.password || "Password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/20"
+              className="w-full bg-black/30 border border-white/5 rounded-[1.5rem] py-4 px-6 text-white text-sm focus:outline-none focus:border-emerald-500/40 transition-all font-medium placeholder:text-white/40"
             />
 
             {mode === 'register' && (
@@ -139,7 +204,7 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
                 <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
-                  {mode === 'register' ? t.createAccount : t.startScanning}
+                  {mode === 'register' ? (t.createAccount || 'Create Account') : (t.login || 'Login')}
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
@@ -149,24 +214,14 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading 
           </div>
         </div>
 
-        {/* Technical Footer */}
-        <div className="mt-12 flex flex-col items-center gap-4 opacity-40">
-          <div className="flex gap-8">
-            <div className="flex flex-col items-center">
-              <span className="text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-1">Status</span>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[0.6rem] font-medium uppercase tracking-widest">Orbital Online</span>
-              </div>
-            </div>
-            <div className="w-[1px] h-8 bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-1">Region</span>
-              <span className="text-[0.6rem] font-medium uppercase tracking-widest text-emerald-400">Global Scan</span>
-            </div>
-          </div>
-        </div>
+      </div>
+      
+      <div className="absolute right-[-5%] md:right-[2%] top-1/2 -translate-y-1/2 w-[460px] md:w-[636px] lg:w-[726px] aspect-square pointer-events-none md:pointer-events-auto z-[5] hidden sm:block">
+        <Suspense fallback={null}>
+          <Globe />
+        </Suspense>
       </div>
     </div>
+
   );
 }
