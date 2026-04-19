@@ -186,7 +186,7 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
           {isProof ? `${t.after} ${(t.photoOptional ?? '(optional)').replace('(', '').replace(')', '')}` : (t.photoOptional ?? '(optional)')}
           </div>
           <input
-            type="file" accept="image/*" capture="environment"
+            type="file" accept="image/*"
             onChange={e => setPhoto(e.target.files[0])}
             className="w-full bg-black/30 border border-dashed border-white/10 rounded-[1.5rem] px-4 py-3 sm:px-5 sm:py-4 text-white/40 text-[0.8rem] sm:text-sm cursor-pointer
                        file:bg-white/5 file:text-white file:border file:border-white/10 file:rounded-xl file:px-3 file:py-1.5 sm:file:px-4 sm:file:py-2 file:text-[0.6rem] sm:file:text-xs file:font-black file:uppercase file:tracking-wider file:mr-2 sm:file:mr-4 file:cursor-pointer hover:file:bg-white/10 transition-all"
