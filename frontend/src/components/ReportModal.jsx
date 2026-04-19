@@ -86,10 +86,10 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
 
   return (
     <div
-      className="fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5"
+      className="fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center px-[5vw] pb-6 pt-0 sm:p-5"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-md rounded-t-2xl sm:rounded-2xl
+      <div className="w-full max-w-md rounded-2xl sm:rounded-2xl
                       bg-black/60 backdrop-blur-3xl backdrop-saturate-150
                       border border-white/[0.05]
                       shadow-[0_32px_64px_rgba(0,0,0,0.6)]

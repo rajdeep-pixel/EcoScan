@@ -42,7 +42,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                     bg-black border-r border-white/[0.08]
                     transition-all duration-300 ease-in-out
                     ${isOpen 
-                      ? 'w-[45%] sm:w-[312px] px-2 sm:px-6 py-4 sm:py-5 translate-x-0' 
+                      ? 'w-[75%] sm:w-[312px] px-4 sm:px-6 py-4 sm:py-5 translate-x-0' 
                       : 'w-0 sm:w-[67px] px-0 sm:px-0 py-4 sm:py-5 items-center -translate-x-full sm:translate-x-0 overflow-hidden'
                     }`}
       >
