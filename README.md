@@ -1,180 +1,248 @@
-# 🌍 EcoScan: AI-Powered Community Waste Management
+# 🌍 EcoScan — AI-Powered Community Waste Management
 
-[![Status](https://img.shields.io/badge/Status-Active-emerald?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)](#)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](#)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
-[![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](#)
+[![Groq](https://img.shields.io/badge/Groq_AI-FF6C37?style=for-the-badge)](#)
+[![Leaflet](https://img.shields.io/badge/Leaflet.js-199900?style=for-the-badge&logo=leaflet&logoColor=white)](#)
 
-**EcoScan** is a real-time, gamified community waste management platform designed to empower citizens to report local waste and volunteers to verify and clean up spots. By combining interactive Leaflet mapping, real-time WebSocket synchronization, and advanced AI vision models, EcoScan bridges the gap between community civic reporting and environmental action.
+**EcoScan** is a real-time, gamified community waste management platform. Citizens report local waste spots on an interactive map; volunteers claim and clean them up. Every submission is automatically verified by an AI vision model before points are awarded. A second AI pipeline cross-checks the reported GPS location against Google Maps Street View to detect fraudulent or misplaced reports.
 
 ---
 
-## 🏗️ System Architecture & Design
+## ✨ Key Features
 
-EcoScan uses a decoupled client-server architecture built for high responsiveness, secure authentication, and low-latency real-time state synchronization.
+| Feature | Description |
+|---|---|
+| 🗺️ **Interactive Map** | Leaflet map with custom severity markers, Street & Satellite views |
+| 🔥 **Snapchat-Style Heatmap** | Toggle a heat overlay to see high-density waste zones at a glance |
+| 🤖 **AI Cleanup Verification** | Groq Vision LLM compares before & after photos to approve or reject cleanups |
+| 📍 **Location Image Check** | AI cross-checks the uploaded image against Google Street View for the same coordinates |
+| 🎯 **Severity Filter** | Filter map markers by status (Reported / Active / Cleaned) or severity (High / Medium / Low) |
+| 🏆 **Gamified Leaderboard** | Volunteers earn points per cleanup (Low = 10 / Medium = 25 / High = 50 pts) with badge tiers |
+| 🎨 **8 Visual Themes** | Midnight · Matrix · Sunset · Ocean · Purple · Cherry · Arctic · Forest |
+| 🔄 **Live Refresh** | One-click report refresh with spinning indicator and "last refreshed Xs ago" tooltip |
+| 📊 **Stats Drawer** | Analytics panel with reported / in-progress / cleaned breakdowns |
+| 🌐 **Bilingual UI** | English and Hindi language support |
+| 🔔 **Toast Notifications** | Contextual success / error / info toasts for all user actions |
+| 🌐 **Real-Time WebSockets** | New reports and status changes broadcast instantly to all connected users |
+
+---
+
+## 🏗️ System Architecture
+
+EcoScan uses a decoupled client-server architecture with real-time WebSocket synchronisation and two independent AI pipelines.
 
 ```mermaid
 flowchart TB
-    subgraph Client [Frontend App - React & Leaflet]
-        UI[Glassmorphism UI]
-        Map[Interactive Leaflet Map]
+    subgraph Client ["Frontend — React 18 + Vite"]
+        UI[Professional Dark UI]
+        Map[Leaflet Interactive Map]
+        Heatmap[Snapchat Heatmap Layer]
         WSClient[WebSocket Client]
     end
 
-    subgraph Backend [FastAPI Server]
-        Auth[Authentication Handler]
+    subgraph Backend ["FastAPI — Python 3"]
+        Auth[Auth Handler]
         Report[Report Controller]
-        WSMgr[WebSocket Connection Manager]
-        AI[AI Vision Verification Service]
+        WSMgr[WebSocket Manager]
+        AI_Cleanup[AI Cleanup Verifier]
+        AI_Location[AI Location Verifier]
     end
 
-    subgraph External [Services]
-        Neon[(Neon Serverless PostgreSQL)]
+    subgraph External ["External Services"]
+        Neon[(Neon PostgreSQL / SQLite)]
         Groq[Groq Vision API]
+        StreetView[Google Street View API]
     end
 
-    UI -->|1. REST API Requests| Backend
-    Map -->|2. Drop Pin and View Markers| UI
-    WSClient -->|3. Live Updates JSON| WSMgr
+    UI -->|REST API| Backend
+    WSClient -->|Live Updates| WSMgr
     WSMgr --> WSClient
-    Report -->|4. Read and Write Models| Neon
-    Auth -->|5. Password Hash and Token Verification| Neon
-    AI -->|6. Compare before and after images| Groq
+    Report --> Neon
+    Auth --> Neon
+    AI_Cleanup -->|Before & After Images| Groq
+    AI_Location -->|GPS Coords + Photo| Groq
+    AI_Location -->|Fetch Reference Image| StreetView
 ```
 
-### 1. Frontend Architecture
-- **Component Design:** Built using **React 18** and **Vite** with component-driven styling. It features a responsive grid with dark glassmorphism styling and custom HSL colors.
-- **3D Interactive Graphics:** Powered by **Three.js** via `@react-three/fiber` and `@react-three/drei` to render an optimized WebGL interactive globe on the landing page showing active global waste reports.
-- **Interactive Mapping:** Powered by **React-Leaflet** and **Leaflet.js**, featuring custom vector marker rendering, styled dark Google Maps street view tiles, and custom location-picking overlays.
-- **Network Layer:** Axios with request interceptors to automatically attach Bearer Auth tokens stored in session storage.
+---
 
-### 2. Backend Architecture
-- **API Framework:** Built on **FastAPI** (Python 3) using an ASGI interface with **Uvicorn** for async request handling.
-- **Real-Time Synchronizer:** Built using native WebSockets. When a report is created or updated, the server broadcasts JSON payloads to all active WebSocket connections, updating the map and leaderboards instantly without client refreshes.
-- **ORM & Database:** SQLAlchemy ORM handles relations. It supports PostgreSQL (Neon Serverless) in production and automatically falls back to SQLite (`ecoscan.db`) locally.
-- **Security Pipeline:** PBKDF2 HMAC SHA-256 password hashing with a secure token authentication scheme.
+## 🎨 UI Design System
 
-### 3. AI Verification Pipeline
-- **API Integration:** Connects to the **Groq Vision API** to review submitted cleanup proofs.
-- **Model Configuration:** Employs **`meta-llama/llama-4-scout-17b-16e-instruct`** for high-accuracy multimodal comparisons.
-- **Verification Logic:**
-  1. The volunteer uploads an "after" cleanup photo.
-  2. The backend sends both the original "before" image and the new "after" image to Groq in a structured base64 payload.
-  3. The model reviews description and landmark context to verify that the photo shows the same location and that the waste has been successfully cleaned.
-  4. The model returns a structured JSON output mapping the verification to `approved` or `rejected`, a confidence score (0.0 to 1.0), and a detailed explanation summary.
+### Header (48px slim bar)
+The top navigation bar is a strict **3-zone layout**:
+
+```
+[ Logo ]  ←── [ Map | Filter | Language | Theme | Refresh ] ──→  [ Live Stats ]
+```
+
+- Every button has `hover:scale-110` with smooth easing
+- Custom **Tip tooltip** component with arrow + fade-in animation
+- Grouped buttons in pill containers with vertical dividers
+
+### Visual Themes
+All themes use CSS `filter` (hue-rotate + saturation + brightness) for a zero-overhead, instant colour transformation:
+
+| Theme | Hue Shift | Mood |
+|---|---|---|
+| 🌙 Midnight | None | Default dark teal |
+| 💚 Matrix | +35° | Cyberpunk lime |
+| 🌅 Sunset | +165° | Warm amber gold |
+| 🌊 Ocean | +200° | Cool sky blue |
+| 💜 Purple | +260° | Deep violet |
+| 🌸 Cherry | +320° | Rose pink |
+| ❄️ Arctic | +185° desaturated | Ice white-blue |
+| 🌲 Forest | +55° | Earthy olive |
+
+### Sidebar
+- Collapsed rail: shows avatar, leaderboard icon, quick stats, logout
+- Expanded: profile card · last report card · leaderboard shortcut · impact stats · badge tier progression
+- Toggle: `PanelLeftClose / PanelLeftOpen` icon embedded in the header row
 
 ---
 
-## 📊 Database Schema & Data Model
+## 🤖 AI Pipelines
 
-The database holds two primary entities with relational integrity:
+### 1 — Cleanup Verification (`ai_review.py`)
+1. Volunteer uploads an **"after"** photo.
+2. Backend sends both before and after base64 images + location description to **Groq Vision** (`meta-llama/llama-4-scout-17b-16e-instruct`).
+3. Model returns structured JSON: `status` (approved / rejected), `confidence` (0.0–1.0), `summary`.
+4. On approval → points awarded, marker turns cleaned (slate); on rejection → `verification-failed` status shown.
 
-### **Users Table**
-- `id` (Integer, Primary Key)
-- `name` (String, Unique) - Volunteer/Citizen identifier
-- `email` (String, Unique)
-- `password_hash` (String) - Encrypted credentials
-- `role` (String) - `citizen` or `volunteer`
-- `auth_token` (String, Indexed) - Session identifier
-- `total_score` (Integer) - Gamified scoreboard points
-- `cleanup_count` (Integer) - Total verified cleanups
-- `report_count` (Integer) - Total reported waste spots
-
-### **Reports Table**
-- `id` (Integer, Primary Key)
-- `lat` (Float) / `lng` (Float) - Coordinates of the waste
-- `severity` (String) - `low` (10 pts), `medium` (25 pts), `high` (50 pts)
-- `status` (String) - `reported` | `in-progress` | `cleaned` | `pending-review` | `verification-failed`
-- `desc` (String) - Citizen notes
-- `landmark` (String) - Geolocation reference
-- `image_data` (String) - Before-cleanup base64 image
-- `after_image_data` (String) - After-cleanup base64 proof
-- `reporter_id` (ForeignKey -> Users) - Reporter link
-- `claimed_by_id` (ForeignKey -> Users) - Volunteer link
-- `verification_status` (String) - `not-started` | `approved` | `rejected` | `unavailable`
-- `verification_confidence` (Float) - Confidence level
-- `verification_summary` (String) - AI summary explanation
+### 2 — Location Image Verification (`ai_review_location.py`)
+1. When a citizen submits a report, the backend fetches a **Google Street View** static image for the GPS coordinates.
+2. Both the citizen's uploaded photo and the Street View reference are sent to Groq Vision.
+3. The model checks whether the uploaded photo plausibly matches the real-world location.
+4. Result stored in `loc_verification_status` / `loc_verification_confidence` / `loc_verification_summary` columns.
 
 ---
 
-## 🕹️ Interactive Demo Walkthrough
+## 📊 Database Schema
 
-To experience the full gamified lifecycle of EcoScan, you should create **two separate accounts** (one for reporting and one for cleaning) to see the live WebSockets and AI verification in action:
+### Users Table
+| Column | Type | Notes |
+|---|---|---|
+| `id` | Integer PK | — |
+| `name` | String | Display name |
+| `email` | String | Unique |
+| `password_hash` | String | PBKDF2-HMAC-SHA256 |
+| `role` | String | `citizen` or `volunteer` |
+| `auth_token` | String | Session token |
+| `total_score` | Integer | Gamification points |
+| `cleanup_count` | Integer | Verified cleanups |
+| `report_count` | Integer | Reports submitted |
 
-### **Step 1: Report as a Citizen 👤**
-1. **Register/Login** as a **Citizen**.
-2. Click the **`+` (Add)** floating button in the bottom right.
-3. Select the **Severity** of the waste (Low, Medium, High).
-4. Click **"Drop pin on map instead"** to enter location-picking mode, then click anywhere on the interactive map.
-5. Upload a **"Before"** photo of the garbage, add a short description and landmark, and click **"Submit Report"**.
-6. The map will instantly broadcast the new pin to all active users in real-time.
-
-### **Step 2: Clean up as a Volunteer 🧹**
-1. **Log out** of the Citizen account, and **Register/Login** with a new email as a **Volunteer**.
-2. Locate the reported marker on the map and click it to view details.
-3. Click **"Claim for Cleanup"**. The marker will turn to a pulsating yellow, indicating a volunteer is on the way.
-4. Once cleaned, click the marker and select **"Submit Proof"**.
-5. Upload the **"After"** cleanup photo and submit.
-
-### **Step 3: AI Verification & Scoring 🤖**
-1. The **Groq Vision LLM** (`meta-llama/llama-4-scout-17b-16e-instruct`) immediately runs a before-and-after comparison of the photos.
-2. It evaluates whether the photos show the same location and if the waste has actually been removed.
-3. **If Approved:** The spot is marked as **"Cleaned"** (slate-gray icon), the volunteer is automatically awarded points based on severity (Low = 10, Medium = 25, High = 50 pts), and the global Leaderboard updates live!
-4. **If Rejected:** The status changes to **"Verification Failed"**, showing the AI's explanation summary.
+### Reports Table
+| Column | Type | Notes |
+|---|---|---|
+| `id` | Integer PK | — |
+| `lat` / `lng` | Float | GPS coordinates |
+| `severity` | String | `low` / `medium` / `high` |
+| `status` | String | `reported` · `in-progress` · `pending-review` · `cleaned` · `verification-failed` |
+| `desc` | String | Citizen description |
+| `landmark` | String | Nearby reference |
+| `image_data` | Text | Base64 before photo |
+| `after_image_data` | Text | Base64 after photo |
+| `reporter_id` | FK → Users | Who reported |
+| `claimed_by_id` | FK → Users | Volunteer claiming |
+| `verification_status` | String | Cleanup AI result |
+| `verification_confidence` | Float | 0.0 – 1.0 |
+| `verification_summary` | String | AI explanation |
+| `loc_verification_status` | String | Location AI result |
+| `loc_verification_confidence` | Float | 0.0 – 1.0 |
+| `loc_verification_summary` | String | Location AI explanation |
 
 ---
 
-## 🚀 Local Development Setup
+## 🕹️ Demo Walkthrough
 
-To run EcoScan locally, you will need two terminal windows—one for the FastAPI backend and one for the React frontend.
+To see the full lifecycle, create **two accounts** — one Citizen and one Volunteer.
 
-### **1. Backend Setup**
+### Step 1 — Report (Citizen 👤)
+1. Register / Login as **Citizen**
+2. Click the **`+`** FAB (bottom-right)
+3. Choose severity, drop a pin on the map, upload a before photo, add description + landmark
+4. Submit — the marker broadcasts live to all connected users
+
+### Step 2 — Clean Up (Volunteer 🧹)
+1. Login as **Volunteer**
+2. Click any reported marker → **"Claim for Cleanup"** (marker turns amber/pulsating)
+3. After cleaning: click marker → **"Submit Proof"**, upload the after photo
+
+### Step 3 — AI Verification 🤖
+1. Groq Vision compares before & after photos
+2. **Approved** → spot marked Cleaned, volunteer awarded points, leaderboard updates instantly
+3. **Rejected** → status shows `verification-failed` with AI summary visible on the marker popup
+
+### Step 4 — Explore the Map 🗺️
+- Toggle **Heatmap View** (top-right on map) to see waste density
+- Use the **Filter** dropdown in the header to isolate High / Active / Cleaned markers
+- Switch **Visual Theme** from the palette icon in the header
+- Click **Refresh** (↻) to pull the latest reports from the server
+
+---
+
+## 🚀 Local Development
+
+Two terminals required.
+
+### Backend
 ```bash
 cd backend
-
-# Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-
-# Install dependencies
+source venv/bin/activate       # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Start the server
 python main.py
+# API runs on http://localhost:8000
+# Swagger UI: http://localhost:8000/docs
 ```
 
-### **2. Frontend Setup**
+### Frontend
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start the Vite development server
 npm run dev
+# App runs on http://localhost:5174
 ```
 
 ---
 
 ## ⚙️ Environment Variables
 
-### **Backend (`backend/.env`)**
-```bash
-# Obtain your key from https://console.groq.com/
+### `backend/.env`
+```env
+# Required — get your key at https://console.groq.com/
 GROQ_API_KEY=your_groq_api_key_here
 
-# SQLite is default, but you can specify PostgreSQL for production:
+# Optional — defaults to local SQLite (ecoscan.db)
 DATABASE_URL=postgresql://user:password@host/dbname
+
+# Optional — enables Google Street View location verification
+GOOGLE_MAPS_API_KEY=your_google_maps_key_here
 ```
 
-### **Frontend (`frontend/.env`)**
-*Note: In local development, the frontend automatically falls back to `http://localhost:8000` and `ws://localhost:8000/ws/updates` out of the box.*
-```bash
-# Points frontend to backend endpoints
+### `frontend/.env`
+```env
+# Points the frontend to your deployed backend (optional in local dev)
 VITE_API_BASE_URL=https://your-backend-api.com
 ```
 
 ---
 
+## 🏅 Gamification — Badge Tiers (Volunteers)
+
+| Badge | Points Required | Icon |
+|---|---|---|
+| Eco Explorer | ≥ 50 pts | 🌱 |
+| Green Knight | ≥ 150 pts | ⚔️ |
+| Eco Champion | ≥ 300 pts | 👑 |
+
+Severity → points: **Low = 10 · Medium = 25 · High = 50**
+
+---
+
 ## 🔒 License
+
 This project is proprietary. All rights reserved by the EcoScan team.
