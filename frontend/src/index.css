@@ -56,6 +56,14 @@ body {
   transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.street-map-filter .leaflet-tile-container {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.15);
+}
+
+.picking-location .leaflet-grab {
+  cursor: crosshair !important;
+}
+
 .solid-marker-container {
   display: flex !important;
   align-items: center;

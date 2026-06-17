@@ -11,34 +11,22 @@ const API = axios.create({
 });
 
 export async function registerUser(payload) {
-  try {
-    const { data } = await API.post('/auth/register', payload);
-    return data;
-  } catch (error) {
-    throw error.response?.data?.detail || "Registration failed. Please try again.";
-  }
+  const { data } = await API.post('/auth/register', payload);
+  return data;
 }
 
 export async function loginUser(payload) {
-  try {
-    const { data } = await API.post('/auth/login', payload);
-    return data;
-  } catch (error) {
-    throw error.response?.data?.detail || "Invalid credentials.";
-  }
+  const { data } = await API.post('/auth/login', payload);
+  return data;
 }
 
 export async function fetchCurrentUser(token) {
-  try {
-    const { data } = await API.get('/auth/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return data;
-  } catch (error) {
-    throw error.response?.status === 401 ? "Session expired" : "Failed to fetch user";
-  }
+  const { data } = await API.get('/auth/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return data;
 }
 
 export default API;

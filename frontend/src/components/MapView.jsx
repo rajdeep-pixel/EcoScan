@@ -27,7 +27,7 @@ const createSolidIcon = (color, size, isCleaning) => {
   });
 };
 
-export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocation, t, mapMode, currentUser }) {
+export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocation, setPickingLocation, setPinnedLocation, t, mapMode, currentUser }) {
   if (!t) return null; 
 
   const isSatellite = mapMode === 'satellite';
@@ -39,11 +39,29 @@ export default function MapView({ reports, onClaimSpot, onMapClick, pickingLocat
   const attribution = '&copy; <a href="https://www.google.com/mapmaker">Google</a>';
 
   const filterClass = isSatellite ? 'dark-map-filter' : 'street-map-filter';
+  const pickingClass = pickingLocation ? 'picking-location' : '';
 
   const mapCenter = reports?.length ? [reports[0].lat, reports[0].lng] : DEFAULT_CENTER;
 
   return (
-    <div className={`relative w-full h-full transition-all duration-700 ${filterClass}`}>
+    <div className={`relative w-full h-full transition-all duration-700 ${filterClass} ${pickingClass}`}>
+      {pickingLocation && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3.5 bg-black/95 backdrop-blur-md border border-emerald-500/30 rounded-2xl shadow-2xl">
+          <span className="text-[0.75rem] sm:text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            📍 {t.clickToPin || 'Click anywhere on the map to drop a pin'}
+          </span>
+          <button
+            onClick={() => {
+              setPickingLocation(false);
+              setPinnedLocation(null);
+            }}
+            className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-[0.65rem] font-bold rounded-lg uppercase tracking-wider transition-colors cursor-pointer border border-white/10"
+          >
+            {t.cancel || 'Cancel'}
+          </button>
+        </div>
+      )}
 
       <MapContainer
         center={mapCenter}

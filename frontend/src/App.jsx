@@ -57,7 +57,9 @@ export default function App() {
     }
     loadReports();
 
-    const socketUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/updates';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const wsBase = apiBaseUrl.replace(/^http/, 'ws');
+    const socketUrl = import.meta.env.VITE_WS_URL || `${wsBase.endsWith('/') ? wsBase.slice(0, -1) : wsBase}/ws/updates`;
     const socket = new WebSocket(socketUrl);
 
     socket.onmessage = (event) => {
@@ -96,7 +98,9 @@ export default function App() {
           sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
         }
       } catch (error) {
-        if (!ignore) {
+        // Only log out if the backend explicitly returned a 401 Unauthorized status.
+        // Temporary network issues or server errors should not clear the session.
+        if (!ignore && error?.response?.status === 401) {
           sessionStorage.removeItem('ecoscan_session');
           setSession(null);
         }
@@ -176,11 +180,13 @@ export default function App() {
       return;
     }
 
+    const backupReports = [...reports];
     setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'in-progress', volunteer_name: session.user.name } : r));
     try { 
       await claimReport(id); 
       await loadReports();
     } catch (err) { 
+      setReports(backupReports);
       if (err?.response?.status === 401) {
         sessionStorage.removeItem('ecoscan_session');
         setSession(null);
@@ -295,6 +301,8 @@ export default function App() {
           onClaimSpot={handleClaimSpot}
           onMapClick={handleMapClick}
           pickingLocation={pickingLocation}
+          setPickingLocation={setPickingLocation}
+          setPinnedLocation={setPinnedLocation}
           t={t}
           mapMode={mapMode}
           currentUser={session.user}

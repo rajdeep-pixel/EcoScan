@@ -2,7 +2,7 @@ import ecoscanTitle from '../assets/ecoscan_title.png';
 import { Menu, Map, Globe } from 'lucide-react';
 
 export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, mapMode, setMapMode, userName }) {
-  const total      = reports.length;
+  const reported   = reports.filter(r => r.status === 'reported' || r.status === 'verification-failed').length;
   const inProgress = reports.filter(r => r.status === 'in-progress').length;
   const cleaned    = reports.filter(r => r.status === 'cleaned').length;
 
@@ -57,7 +57,7 @@ export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, 
       <div className="flex items-center gap-10 flex-shrink-0">
         <div className="hidden lg:flex items-center gap-8 transition-all">
           {[
-            { id: 'reported',   label: t.reported,   count: total,      color: null },
+            { id: 'reported',   label: t.reported,   count: reported,   color: null },
             { id: 'inProgress', label: t.inProgress, count: inProgress, color: 'bg-yellow-500 shadow-[0_0_12px_#eab308] animate-pulse' },
             { id: 'cleaned',    label: t.cleaned,    count: cleaned,    color: 'bg-slate-500 shadow-[0_0_10px_#64748b]' }
           ].map((stat, i) => (

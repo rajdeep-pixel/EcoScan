@@ -22,7 +22,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
   const myReports = currentUser?.reports ?? myReportsArray.length;
   const myCleaned = currentUser?.cleanups ?? myCleanedArray.length;
 
-  const total = reports.length;
+  const reported = reports.filter(r => r.status === 'reported' || r.status === 'verification-failed').length;
   const inProgress = reports.filter(r => r.status === 'in-progress').length;
   const globalCleaned = reports.filter(r => r.status === 'cleaned').length;
 
@@ -139,7 +139,7 @@ export default function Sidebar({ isOpen, onToggle, onLogout, reports = [], t, o
                 </div>
                 <div className="flex flex-col gap-3">
                   {[
-                    { label: t.reported || 'Reported', count: total, color: 'bg-white/20' },
+                    { label: t.reported || 'Reported', count: reported, color: 'bg-white/20' },
                     { label: t.inProgress || 'In-Progress', count: inProgress, color: 'bg-yellow-500 shadow-[0_0_10px_#eab308]' },
                     { label: t.cleaned || 'Cleaned', count: globalCleaned, color: 'bg-slate-500 shadow-[0_0_10px_#64748b]' }
                   ].map((stat, i) => (
