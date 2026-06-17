@@ -34,22 +34,26 @@ function LocationPin({ position }) {
   );
 }
 
+const PARTICLE_COUNT = 200;
+const PARTICLE_POSITIONS = (() => {
+  const positions = [];
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const r = Math.random() * 1.5;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions.push(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+  return new THREE.Float32BufferAttribute(positions, 3);
+})();
+
 function InternalParticles() {
   const geo = useMemo(() => {
-    const positions = [];
-    const count = 200;
-    for (let i = 0; i < count; i++) {
-      const r = Math.random() * 1.5;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions.push(
-        r * Math.sin(phi) * Math.cos(theta),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-    }
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    g.setAttribute('position', PARTICLE_POSITIONS);
     return g;
   }, []);
 

@@ -15,7 +15,7 @@ API.interceptors.request.use((config) => {
       if (session?.token) {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
-    } catch (error) {
+    } catch {
       sessionStorage.removeItem('ecoscan_session');
     }
   }

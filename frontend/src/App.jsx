@@ -93,9 +93,12 @@ export default function App() {
       try {
         const { user } = await fetchCurrentUser(session.token);
         if (!ignore) {
-          const nextSession = { ...session, user };
-          setSession(nextSession);
-          sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+          setSession(prev => {
+            if (!prev) return null;
+            const nextSession = { ...prev, user };
+            sessionStorage.setItem('ecoscan_session', JSON.stringify(nextSession));
+            return nextSession;
+          });
         }
       } catch (error) {
         // Only log out if the backend explicitly returned a 401 Unauthorized status.

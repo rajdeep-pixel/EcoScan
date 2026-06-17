@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MapPin, Loader, X } from 'lucide-react';
 // 1. IMPORT THE COMPRESSION LIBRARY
 import imageCompression from 'browser-image-compression';
@@ -12,10 +12,6 @@ export default function ReportModal({ onClose, onSubmit, pinnedLocation, onStart
   const [landmark, setLandmark]   = useState('');
   // Added a small loading state so the button doesn't freeze while compressing
   const [isCompressing, setIsCompressing] = useState(false);
-
-  useEffect(() => {
-    if (pinnedLocation) { setLocation(pinnedLocation); setLocStatus('ok'); }
-  }, [pinnedLocation]);
 
   function handleGeolocate() {
     setLocStatus('loading');

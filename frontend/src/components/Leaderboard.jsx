@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Trophy, Medal, Star, Loader2 } from 'lucide-react';
 import { fetchLeaderboard } from '../api/reports';
 
-export default function Leaderboard({ onClose, t, theme }) {
+export default function Leaderboard({ onClose, t }) {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 

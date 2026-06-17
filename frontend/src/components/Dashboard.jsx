@@ -1,7 +1,7 @@
 import ecoscanTitle from '../assets/ecoscan_title.png';
 import { Menu, Map, Globe } from 'lucide-react';
 
-export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, mapMode, setMapMode, userName }) {
+export default function Dashboard({ reports, t, lang, setLang, onToggleSidebar, mapMode, setMapMode }) {
   const reported   = reports.filter(r => r.status === 'reported' || r.status === 'verification-failed').length;
   const inProgress = reports.filter(r => r.status === 'in-progress').length;
   const cleaned    = reports.filter(r => r.status === 'cleaned').length;
