@@ -34,12 +34,12 @@ flowchart TB
     end
 
     UI -->|1. REST API Requests| Backend
-    Map -->|2. Drop Pin / View Markers| UI
-    WSClient -->|3. Live Updates (JSON)| WSMgr
+    Map -->|2. Drop Pin and View Markers| UI
+    WSClient -->|3. Live Updates JSON| WSMgr
     WSMgr --> WSClient
-    Report -->|4. Read/Write Models| Neon
-    Auth -->|5. Password Hash & Token Verification| Neon
-    AI -->|6. Compare before/after images| Groq
+    Report -->|4. Read and Write Models| Neon
+    Auth -->|5. Password Hash and Token Verification| Neon
+    AI -->|6. Compare before and after images| Groq
 ```
 
 ### 1. Frontend Architecture
