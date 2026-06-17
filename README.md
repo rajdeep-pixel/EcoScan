@@ -1,38 +1,98 @@
 # 🌍 EcoScan: AI-Powered Community Waste Management
 
-![EcoScan Banner](https://img.shields.io/badge/Status-Active-emerald?style=for-the-badge)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)
+[![Status](https://img.shields.io/badge/Status-Active-emerald?style=for-the-badge)](#)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
+[![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)](#)
 
-**EcoScan** is a real-time, gamified platform designed to empower communities to report, verify, and clean up local waste. By combining geolocation, real-time WebSocket synchronization, and advanced AI vision models, EcoScan bridges the gap between civic reporting and actual environmental action.
-
-## ✨ Key Features
-
-* **📍 Real-Time Geospatial Mapping:** Drop pins on an interactive map to report waste severity (Low, Medium, High).
-* **🤖 AI Cleanup Verification:** Volunteers upload "after" photos. Our integrated Groq Vision LLM automatically analyzes the before/after photos to verify if the cleanup is legitimate before awarding points.
-* **⚡ Live Synchronization:** Built on WebSockets, the map and leaderboards update instantly across all connected clients without needing to refresh.
-* **🏆 Gamification & Leaderboards:** Volunteers earn points based on the severity of the waste they clean, driving community engagement through competitive leaderboards.
-* **🌐 Multilingual Support:** Seamlessly toggle between English and Hindi to maximize accessibility.
-* **✨ Premium 3D UI:** Features an optimized WebGL Three.js interactive globe and fluid glassmorphism design.
+**EcoScan** is a real-time, gamified community waste management platform designed to empower citizens to report local waste and volunteers to verify and clean up spots. By combining interactive Leaflet mapping, real-time WebSocket synchronization, and advanced AI vision models, EcoScan bridges the gap between community civic reporting and environmental action.
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🏗️ System Architecture & Design
 
-### **Backend & Database**
-* **Framework:** Python 3, FastAPI, Uvicorn (ASGI)
-* **Database:** PostgreSQL (Neon Serverless), SQLAlchemy ORM
-* **Real-Time Engine:** FastAPI Native WebSockets
-* **AI Integration:** Groq API (`llama-4-scout-17b-16e-instruct` Vision Model)
-* **Security:** PBKDF2 HMAC SHA-256 password hashing, Custom Token Auth
+EcoScan uses a decoupled client-server architecture built for high responsiveness, secure authentication, and low-latency real-time state synchronization.
 
-### **Frontend**
-* **Framework:** React 18, Vite
-* **Mapping:** React-Leaflet, Leaflet.js, Google Maps Tile API
-* **3D Graphics:** Three.js, `@react-three/fiber`, `@react-three/drei`
-* **Styling:** Tailwind CSS, Custom CSS (Fluid keyframes, Canvas Canvas manipulation)
-* **Networking:** Axios with global interceptors
+```mermaid
+flowchart TB
+    subgraph Client [Frontend App - React & Leaflet]
+        UI[Glassmorphism UI]
+        Map[Interactive Leaflet Map]
+        WSClient[WebSocket Client]
+    end
+
+    subgraph Backend [FastAPI Server]
+        Auth[Authentication Handler]
+        Report[Report Controller]
+        WSMgr[WebSocket Connection Manager]
+        AI[AI Vision Verification Service]
+    end
+
+    subgraph External [Services]
+        Neon[(Neon Serverless PostgreSQL)]
+        Groq[Groq Vision API]
+    end
+
+    UI -->|1. REST API Requests| Backend
+    Map -->|2. Drop Pin / View Markers| UI
+    WSClient <-->|3. Live Updates (JSON)| WSMgr
+    Report -->|4. Read/Write Models| Neon
+    Auth -->|5. Password Hash & Token Verification| Neon
+    AI -->|6. Compare before/after images| Groq
+```
+
+### 1. Frontend Architecture
+- **Component Design:** Built using **React 18** and **Vite** with component-driven styling. It features a responsive grid with dark glassmorphism styling and custom HSL colors.
+- **3D Interactive Graphics:** Powered by **Three.js** via `@react-three/fiber` and `@react-three/drei` to render an optimized WebGL interactive globe on the landing page showing active global waste reports.
+- **Interactive Mapping:** Powered by **React-Leaflet** and **Leaflet.js**, featuring custom vector marker rendering, styled dark Google Maps street view tiles, and custom location-picking overlays.
+- **Network Layer:** Axios with request interceptors to automatically attach Bearer Auth tokens stored in session storage.
+
+### 2. Backend Architecture
+- **API Framework:** Built on **FastAPI** (Python 3) using an ASGI interface with **Uvicorn** for async request handling.
+- **Real-Time Synchronizer:** Built using native WebSockets. When a report is created or updated, the server broadcasts JSON payloads to all active WebSocket connections, updating the map and leaderboards instantly without client refreshes.
+- **ORM & Database:** SQLAlchemy ORM handles relations. It supports PostgreSQL (Neon Serverless) in production and automatically falls back to SQLite (`ecoscan.db`) locally.
+- **Security Pipeline:** PBKDF2 HMAC SHA-256 password hashing with a secure token authentication scheme.
+
+### 3. AI Verification Pipeline
+- **API Integration:** Connects to the **Groq Vision API** to review submitted cleanup proofs.
+- **Model Configuration:** Employs **`meta-llama/llama-4-scout-17b-16e-instruct`** for high-accuracy multimodal comparisons.
+- **Verification Logic:**
+  1. The volunteer uploads an "after" cleanup photo.
+  2. The backend sends both the original "before" image and the new "after" image to Groq in a structured base64 payload.
+  3. The model reviews description and landmark context to verify that the photo shows the same location and that the waste has been successfully cleaned.
+  4. The model returns a structured JSON output mapping the verification to `approved` or `rejected`, a confidence score (0.0 to 1.0), and a detailed explanation summary.
+
+---
+
+## 📊 Database Schema & Data Model
+
+The database holds two primary entities with relational integrity:
+
+### **Users Table**
+- `id` (Integer, Primary Key)
+- `name` (String, Unique) - Volunteer/Citizen identifier
+- `email` (String, Unique)
+- `password_hash` (String) - Encrypted credentials
+- `role` (String) - `citizen` or `volunteer`
+- `auth_token` (String, Indexed) - Session identifier
+- `total_score` (Integer) - Gamified scoreboard points
+- `cleanup_count` (Integer) - Total verified cleanups
+- `report_count` (Integer) - Total reported waste spots
+
+### **Reports Table**
+- `id` (Integer, Primary Key)
+- `lat` (Float) / `lng` (Float) - Coordinates of the waste
+- `severity` (String) - `low` (10 pts), `medium` (25 pts), `high` (50 pts)
+- `status` (String) - `reported` | `in-progress` | `cleaned` | `pending-review` | `verification-failed`
+- `desc` (String) - Citizen notes
+- `landmark` (String) - Geolocation reference
+- `image_data` (String) - Before-cleanup base64 image
+- `after_image_data` (String) - After-cleanup base64 proof
+- `reporter_id` (ForeignKey -> Users) - Reporter link
+- `claimed_by_id` (ForeignKey -> Users) - Volunteer link
+- `verification_status` (String) - `not-started` | `approved` | `rejected` | `unavailable`
+- `verification_confidence` (Float) - Confidence level
+- `verification_summary` (String) - AI summary explanation
 
 ---
 
@@ -63,42 +123,26 @@ To experience the full gamified lifecycle of EcoScan, you should create **two se
 
 ---
 
-## 👥 The Team
-
-EcoScan was architected and developed by a dedicated team focused on scalable software and premium user experiences.
-
-* **Shreyas** — *Backend & Database Architect*
-  * Designed the PostgreSQL schema, built the FastAPI backend, implemented real-time WebSocket broadcasting, and engineered the AI vision integration.
-* **Rajdeep** — *Frontend Developer*
-  * Developed the React application, integrated the Leaflet mapping system, managed global state, and engineered the WebGL/Three.js visualizations.
-* **Tulsi** — *UI/UX Designer*
-  * Designed the user journey, crafted the glassmorphism aesthetic, created fluid animations, and ensured a highly accessible, mobile-responsive layout.
-
----
-
 ## 🚀 Local Development Setup
 
 To run EcoScan locally, you will need two terminal windows—one for the FastAPI backend and one for the React frontend.
 
-## 1. Backend Setup
+### **1. Backend Setup**
 ```bash
 cd backend
-```
-## Create and activate a virtual environment
-```bash
+
+# Create and activate a virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-```
-## Install dependencies
-```bash
+
+# Install dependencies
 pip install -r requirements.txt
-```
-## Start the server
-```bash
-uvicorn main:app --reload
+
+# Start the server
+python main.py
 ```
 
-## 2. Frontend Setup
+### **2. Frontend Setup**
 ```bash
 cd frontend
 
@@ -108,18 +152,27 @@ npm install
 # Start the Vite development server
 npm run dev
 ```
-## 3. Environment Variables
-### Create a .env file in your backend/ directory:
 
+---
+
+## ⚙️ Environment Variables
+
+### **Backend (`backend/.env`)**
 ```bash
+# Obtain your key from https://console.groq.com/
 GROQ_API_KEY=your_groq_api_key_here
+
+# SQLite is default, but you can specify PostgreSQL for production:
 DATABASE_URL=postgresql://user:password@host/dbname
 ```
-### Create a .env file in your frontend/ directory:
+
+### **Frontend (`frontend/.env`)**
+*Note: In local development, the frontend automatically falls back to `http://localhost:8000` and `ws://localhost:8000/ws/updates` out of the box.*
 ```bash
-VITE_API_BASE_URL=http://localhost:8000
-VITE_WS_URL=ws://localhost:8000/ws/updates
+# Points frontend to backend endpoints
+VITE_API_BASE_URL=https://your-backend-api.com
 ```
+
 ---
 
 ## 🔒 License
