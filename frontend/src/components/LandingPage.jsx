@@ -57,7 +57,7 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
   const handleKeyDown = (e) => { if (e.key === 'Enter') handleSubmit(); };
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#050507] font-['Outfit']">
+    <div className="relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden bg-[#050507] font-['Outfit']">
       <CursorGlow />
 
       {/* ── Ambient background blobs ── */}
@@ -72,7 +72,7 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
         .fade-up-4 { animation: fadeUp 0.7s 0.3s ease both; }
       `}</style>
 
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full"
           style={{ background:'radial-gradient(circle, #059669 0%, transparent 70%)', opacity:0.12, filter:'blur(60px)', animation:'blob1 16s ease-in-out infinite' }} />
         <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] rounded-full"
@@ -102,15 +102,15 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
       </nav>
 
       {/* ── Main content ── */}
-      <div className="relative z-20 flex min-h-screen w-full items-center
-                      px-5 sm:px-10 lg:px-16 xl:px-24 pt-16">
+      <div className="relative z-20 flex min-h-[100dvh] w-full items-center
+                      px-5 sm:px-10 lg:px-16 xl:px-24 pt-24 pb-12">
         <div className="w-full flex items-center justify-between gap-12 lg:gap-16">
 
-          {/* ──── LEFT: Hero + Auth card ──── */}
-          <div className="w-full max-w-[440px] flex flex-col gap-8 mx-auto lg:mx-0">
+          {/* ──── LEFT: Auth card ──── */}
+          <div className="w-full max-w-[440px] flex flex-col gap-6 mx-auto lg:mx-0 justify-center">
 
-            {/* Hero text */}
-            <div className="fade-up-1 flex flex-col gap-4">
+            {/* Mobile Hero text */}
+            <div className="fade-up-1 flex flex-col gap-4 lg:hidden mb-4">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 self-start
                               px-3 py-1.5 rounded-full
@@ -139,6 +139,18 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
                 <Pill emoji="🔥" label="Heatmap" />
                 <Pill emoji="🎨" label="8 Themes" />
               </div>
+            </div>
+
+            {/* Desktop Auth Title */}
+            <div className="hidden lg:flex flex-col gap-2 fade-up-1">
+              <h2 className="text-[1.8rem] font-bold text-white tracking-tight">
+                {isRegister ? 'Welcome to EcoScan' : 'Welcome back'}
+              </h2>
+              <p className="text-[0.85rem] text-slate-400">
+                {isRegister 
+                  ? 'Sign up to start tracking and cleaning waste globally.' 
+                  : 'Log in to continue your environmental impact.'}
+              </p>
             </div>
 
             {/* ── Auth Card ── */}
@@ -291,12 +303,48 @@ export default function LandingPage({ onAuthenticate, t, lang, setLang, loading,
           </div>
 
           {/* ──── RIGHT: 3D Globe ──── */}
-          <div className="fade-up-4 relative hidden flex-1 items-center justify-center lg:flex pointer-events-none">
+          <div className="fade-up-4 relative hidden flex-1 items-center justify-center lg:flex min-h-[600px]">
+            
+            {/* Desktop Hero text overlay centered */}
+            <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0)_60%)] pointer-events-none" />
+              <div className="relative flex flex-col items-center gap-5 text-center px-4 w-full max-w-[500px]">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2
+                                px-3 py-1.5 rounded-full
+                                border border-emerald-500/20 bg-emerald-500/[0.06]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[0.6rem] font-bold uppercase tracking-widest text-emerald-400">
+                    AI-Powered • Community Platform
+                  </span>
+                </div>
+
+                {/* Headline */}
+                <h1 className="text-[2.2rem] sm:text-[3rem] font-bold leading-[1.1] text-white tracking-tight" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.8)' }}>
+                  {t.heroTitle || <>Spot waste.<br />Report it. Clean it.</>}
+                </h1>
+
+                {/* Sub */}
+                <p className="text-[0.9rem] text-slate-300 leading-relaxed max-w-[420px]" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
+                  {t.heroSub || 'EcoScan connects citizens and volunteers through AI-verified waste cleanup — making every cleanup count on a live global map.'}
+                </p>
+
+                {/* Feature pills */}
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                  <Pill emoji="🗺️" label="Live Map" />
+                  <Pill emoji="🤖" label="AI Verified" />
+                  <Pill emoji="🏆" label="Leaderboard" />
+                  <Pill emoji="🔥" label="Heatmap" />
+                  <Pill emoji="🎨" label="8 Themes" />
+                </div>
+              </div>
+            </div>
+
             {/* Glow ring behind globe */}
-            <div className="absolute w-[360px] h-[360px] xl:w-[440px] xl:h-[440px] rounded-full"
+            <div className="absolute w-[440px] h-[440px] xl:w-[540px] xl:h-[540px] rounded-full"
               style={{ background:'radial-gradient(circle, rgba(5,150,105,0.12) 0%, transparent 70%)' }} />
 
-            <div className="relative aspect-square w-[min(38vw,660px)] min-w-[300px] max-w-[660px]">
+            <div className="relative aspect-square w-[min(46vw,800px)] min-w-[360px] max-w-[800px]">
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="w-16 h-16 border-2 border-emerald-500/20 border-t-emerald-500/60 rounded-full animate-spin" />
